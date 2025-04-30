@@ -1,0 +1,11 @@
+import { API_URL } from '../config';
+
+export const BACKEND_URL = API_URL;
+
+// A simple gray placeholder image with a camera icon
+export const PLACEHOLDER_IMAGE_DATA_URL = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2YwZjBmMCIvPjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDEyMCwxMjApIj48cGF0aCBkPSJNMzAgMGgyMHYxMGgtMjB6IiBmaWxsPSIjNjY2Ii8+PHBhdGggZD0iTTAgMTBoODB2NTBoLTgweiIgZmlsbD0iIzY2NiIvPjxjaXJjbGUgY3g9IjQwIiBjeT0iMzUiIHI9IjE1IiBmaWxsPSIjZjBmMGYwIi8+PC9nPjx0ZXh0IHg9IjE1MCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk5vIEltYWdlIEF2YWlsYWJsZTwvdGV4dD48L3N2Zz4=';
+
+// Add other constants as needed
+export const CURRENCY = '₹';
+export const SHIPPING_COST = 100;
+export const FREE_SHIPPING_THRESHOLD = 5000; 
