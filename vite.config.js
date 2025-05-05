@@ -17,11 +17,8 @@ export default defineConfig(({ mode }) => {
         'parnikasilksonline.onrender.com',
       ],
     },
-    define: {
-      'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'https://parnika-silks.onrender.com'),
-    },
     build: {
-      outDir: 'build',
+      outDir: 'dist',
       sourcemap: false,
       minify: 'terser',
       terserOptions: {
@@ -38,6 +35,9 @@ export default defineConfig(({ mode }) => {
           },
         },
       },
+    },
+    define: {
+      'process.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'https://parnika-silks.onrender.com'),
     },
   };
 }); 
