@@ -60,7 +60,7 @@ const ProductForm: React.FC = () => {
             // Set preview images if there are any
             if (productData.images && productData.images.length > 0) {
               const imageUrls = productData.images.map(
-                (img: string) => `http://localhost:5001${img}`
+                (img: string) => `${import.meta.env.VITE_API_URL}${img}`
               );
               setPreviewImages(imageUrls);
             }

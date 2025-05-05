@@ -89,7 +89,7 @@ const Orders: React.FC = () => {
     if (!imagePath) return placeholderImage;
     if (imagePath.startsWith('data:')) return imagePath;
     if (imagePath.startsWith('http')) return imagePath;
-    return `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/uploads/products/${imagePath.split('/').pop()}`;
+    return `${import.meta.env.VITE_API_URL}/uploads/products/${imagePath.split('/').pop()}`;
   };
 
   const getStatusIcon = (status: string) => {

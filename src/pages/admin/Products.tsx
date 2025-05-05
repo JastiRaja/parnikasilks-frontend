@@ -5,7 +5,7 @@ import { FaEdit, FaTrash, FaPlus, FaSearch } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 // Add BACKEND_URL constant
-const BACKEND_URL = 'http://localhost:5001';
+const BACKEND_URL = import.meta.env.VITE_API_URL;
 
 interface Product {
   _id: string;

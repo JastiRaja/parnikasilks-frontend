@@ -46,7 +46,7 @@ const Home = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      let url = '/api/products?';
+      let url = 'api/products?';
       
       // Add category filter
       if (selectedCategory !== 'all') {

@@ -155,7 +155,7 @@ const AdminProducts: React.FC = () => {
                       <div className="h-16 w-16 overflow-hidden rounded">
                         <img
                           src={product.images && product.images.length > 0 
-                            ? `http://localhost:5001${product.images[0]}` 
+                            ? `${import.meta.env.VITE_API_URL}${product.images[0]}` 
                             : '/images/placeholder.jpg'}
                           alt={product.name}
                           className="h-full w-full object-cover"

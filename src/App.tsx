@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from './components/Navbar';
@@ -25,131 +25,55 @@ import ProductForm from './pages/admin/ProductForm';
 import ScrollToTop from './components/ScrollToTop';
 import { CartProvider } from './context/CartContext';
 import About from './pages/About';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: (
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="flex-grow">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
+    ),
+    children: [
+      { path: '', element: <Home /> },
+      { path: 'about', element: <About /> },
+      { path: 'products', element: <Products /> },
+      { path: 'product/:id', element: <ProductDetail /> },
+      { path: 'cart', element: <Cart /> },
+      { path: 'login', element: <Login /> },
+      { path: 'register', element: <Register /> },
+      { path: 'forgot-password', element: <ForgotPassword /> },
+      { path: 'checkout', element: <ProtectedRoute><Checkout /></ProtectedRoute> },
+      { path: 'account', element: <ProtectedRoute><Account /></ProtectedRoute> },
+      { path: 'my-account', element: <ProtectedRoute><Account /></ProtectedRoute> },
+      { path: 'addresses', element: <ProtectedRoute><ManageAddresses /></ProtectedRoute> },
+      { path: 'my-orders', element: <ProtectedRoute><Orders /></ProtectedRoute> },
+      { path: 'order-confirmation/:id', element: <ProtectedRoute><OrderConfirmation /></ProtectedRoute> },
+      { path: 'admin/dashboard', element: <ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute> },
+      { path: 'admin/products', element: <ProtectedRoute requireAdmin><AdminProducts /></ProtectedRoute> },
+      { path: 'admin/products/new', element: <ProtectedRoute requireAdmin><ProductForm /></ProtectedRoute> },
+      { path: 'admin/products/:productId/edit', element: <ProtectedRoute requireAdmin><ProductForm /></ProtectedRoute> },
+      { path: 'admin/orders', element: <ProtectedRoute requireAdmin><AdminOrders /></ProtectedRoute> },
+      { path: 'admin/customers', element: <ProtectedRoute requireAdmin><AdminCustomers /></ProtectedRoute> },
+    ]
+  }
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true
+  }
+});
 
 const App: React.FC = () => {
   return (
     <CartProvider>
-      <Router>
-        <ScrollToTop />
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-grow">
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-
-              {/* Protected user routes */}
-              <Route
-                path="/checkout"
-                element={
-                  <ProtectedRoute>
-                    <Checkout />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/account"
-                element={
-                  <ProtectedRoute>
-                    <Account />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/my-account"
-                element={
-                  <ProtectedRoute>
-                    <Account />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/addresses"
-                element={
-                  <ProtectedRoute>
-                    <ManageAddresses />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/my-orders"
-                element={
-                  <ProtectedRoute>
-                    <Orders />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/order-confirmation/:id"
-                element={
-                  <ProtectedRoute>
-                    <OrderConfirmation />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Protected admin routes */}
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedRoute requireAdmin>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/products"
-                element={
-                  <ProtectedRoute requireAdmin>
-                    <AdminProducts />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/products/new"
-                element={
-                  <ProtectedRoute requireAdmin>
-                    <ProductForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/products/:productId/edit"
-                element={
-                  <ProtectedRoute requireAdmin>
-                    <ProductForm />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/orders"
-                element={
-                  <ProtectedRoute requireAdmin>
-                    <AdminOrders />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin/customers"
-                element={
-                  <ProtectedRoute requireAdmin>
-                    <AdminCustomers />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-        <ToastContainer position="top-right" autoClose={3000} />
-      </Router>
+      <RouterProvider router={router} />
+      <ToastContainer />
     </CartProvider>
   );
 };
