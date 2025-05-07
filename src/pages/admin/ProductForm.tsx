@@ -114,12 +114,8 @@ const ProductForm: React.FC = () => {
       formData.append('category', product.category);
       formData.append('stock', product.stock.toString());
       
-      // Append specifications
-      if (product.specifications) {
-        Object.entries(product.specifications).forEach(([key, value]) => {
-          formData.append(`specifications[${key}]`, value);
-        });
-      }
+      // Append specifications as a JSON string
+      formData.append('specifications', JSON.stringify(product.specifications));
       
       // Append images
       if (product.images.length > 0) {
