@@ -149,18 +149,18 @@ const AdminProducts: React.FC = () => {
                       <div className="h-16 w-16 overflow-hidden rounded">
                         {product.images && product.images.length > 0 ? (
                           <img
-                            src={`${BACKEND_URL}${product.images[0]}`}
+                            src={`${BACKEND_URL}/api/admin/images/${product.images[0]}`}
                             alt={product.name}
                             className="h-full w-full object-cover"
                             onError={(e) => {
-                              console.error('Failed to load image:', `${BACKEND_URL}${product.images[0]}`);
+                              console.error('Failed to load image:', `${BACKEND_URL}/api/admin/images/${product.images[0]}`);
                               const target = e.target as HTMLImageElement;
-                              target.src = '/images/placeholder.jpg';
+                              target.src = '/images/Placeholder.png';
                             }}
                           />
                         ) : (
                           <img
-                            src="/images/placeholder.jpg"
+                            src="/images/Placeholder.png"
                             alt={`${product.name} (no image)`}
                             className="h-full w-full object-cover"
                           />

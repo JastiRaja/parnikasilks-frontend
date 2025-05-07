@@ -156,12 +156,12 @@ const AdminProducts: React.FC = () => {
                         <img
                           src={product.images && product.images.length > 0 
                             ? `${import.meta.env.VITE_API_URL}${product.images[0]}` 
-                            : '/images/placeholder.jpg'}
+                            : '/images/Placeholder.png'}
                           alt={product.name}
                           className="h-full w-full object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = '/images/placeholder.jpg';
+                            target.src = '/images/Placeholder.png';
                           }}
                         />
                       </div>
