@@ -151,17 +151,17 @@ const AdminProducts: React.FC = () => {
                           <img
                             src={product.images[0] && product.images[0] !== 'null' && product.images[0] !== null && product.images[0] !== undefined && product.images[0] !== ''
                               ? `${BACKEND_URL}/api/admin/images/${product.images[0]}`
-                              : '/images/placeholder.jpg'}
+                              : '/images/Placeholder.png'}
                             alt={product.name}
                             className="h-full w-full object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
-                              target.src = '/images/placeholder.jpg';
+                              target.src = '/images/Placeholder.png';
                             }}
                           />
                         ) : (
                           <img
-                            src="/images/placeholder.jpg"
+                            src="/images/Placeholder.png"
                             alt={`${product.name} (no image)`}
                             className="h-full w-full object-cover"
                           />

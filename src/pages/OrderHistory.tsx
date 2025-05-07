@@ -1,8 +1,8 @@
-const getImageUrl = (imagePath: string): string | undefined => {
-  if (!imagePath) return undefined;
-  if (imagePath.startsWith('data:')) return imagePath;
-  if (imagePath.startsWith('http')) return imagePath;
-  return `${BACKEND_URL}${imagePath}`;
+const getImageUrl = (imageId: string): string => {
+  if (!imageId || imageId === 'null' || imageId === null || imageId === undefined || imageId === '') {
+    return '/images/Placeholder.png';
+  }
+  return `${BACKEND_URL}/api/admin/images/${imageId}`;
 };
 
 <div className="flex-shrink-0">
@@ -11,6 +11,9 @@ const getImageUrl = (imagePath: string): string | undefined => {
       src={getImageUrl(item.product.images[0])}
       alt={item.product.name}
       className="h-24 w-24 rounded-md object-cover object-center sm:h-32 sm:w-32"
+      onError={(e) => {
+        e.currentTarget.src = '/images/Placeholder.png';
+      }}
     />
   ) : (
     <div className="h-24 w-24 rounded-md bg-gray-100 flex items-center justify-center sm:h-32 sm:w-32">

@@ -7,11 +7,11 @@ import { API_URL } from '../config';
 const Cart: React.FC = () => {
   const { items, removeFromCart, updateQuantity, cartTotal } = useCart();
 
-  const getImageUrl = (imagePath: string): string | undefined => {
-    if (!imagePath) return undefined;
-    if (imagePath.startsWith('data:')) return imagePath;
-    if (imagePath.startsWith('http')) return imagePath;
-    return `${API_URL}${imagePath}`;
+  const getImageUrl = (imageId: string): string => {
+    if (!imageId || imageId === 'null' || imageId === null || imageId === undefined || imageId === '') {
+      return '/images/Placeholder.png';
+    }
+    return `${API_URL}/api/admin/images/${imageId}`;
   };
 
   if (items.length === 0) {
@@ -45,6 +45,9 @@ const Cart: React.FC = () => {
                     src={getImageUrl(item.image)}
                     alt={item.name}
                     className="h-24 w-24 rounded-md object-cover object-center sm:h-32 sm:w-32"
+                    onError={(e) => {
+                      e.currentTarget.src = '/images/Placeholder.png';
+                    }}
                   />
                 ) : (
                   <div className="h-24 w-24 rounded-md bg-gray-100 flex items-center justify-center sm:h-32 sm:w-32">

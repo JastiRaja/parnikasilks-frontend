@@ -85,11 +85,11 @@ const Orders: React.FC = () => {
   };
 
   // Add function to construct image URL
-  const getImageUrl = (imagePath: string) => {
-    if (!imagePath) return placeholderImage;
-    if (imagePath.startsWith('data:')) return imagePath;
-    if (imagePath.startsWith('http')) return imagePath;
-    return `${import.meta.env.VITE_API_URL}/uploads/products/${imagePath.split('/').pop()}`;
+  const getImageUrl = (imageId: string) => {
+    if (!imageId || imageId === 'null' || imageId === null || imageId === undefined || imageId === '') {
+      return placeholderImage;
+    }
+    return `${import.meta.env.VITE_API_URL}/api/admin/images/${imageId}`;
   };
 
   const getStatusIcon = (status: string) => {
@@ -220,14 +220,10 @@ const Orders: React.FC = () => {
                 {order.items.map((item, index) => (
                   <div key={index} className="flex items-center space-x-4">
                     <img
-                      src={item.product?.images?.[0] ? getImageUrl(item.product.images[0]) : placeholderImage}
+                      src={item.product?.images?.[0] ? getImageUrl(item.product.images[0]) : '/images/Placeholder.png'}
                       alt={item.product?.name || 'Product'}
-                      className="w-16 h-16 object-cover rounded"
-                      onError={(e) => {
-                        console.log('Image load error for:', item.product?.images?.[0]);
-                        const target = e.target as HTMLImageElement;
-                        target.src = placeholderImage;
-                      }}
+                      onError={(e) => { e.currentTarget.src = '/images/Placeholder.png'; }}
+                      className="h-16 w-16 object-cover rounded"
                     />
                     <div>
                       <h4 className="text-sm font-medium text-gray-800">{item.product?.name || 'Product'}</h4>

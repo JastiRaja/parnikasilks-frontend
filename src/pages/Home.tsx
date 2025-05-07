@@ -23,11 +23,11 @@ const sortOptions = [
 ];
 
 // Function to get the full image URL
-const getImageUrl = (imagePath: string): string | undefined => {
-  if (!imagePath) return undefined;
-  if (imagePath.startsWith('data:')) return imagePath;
-  if (imagePath.startsWith('http')) return imagePath;
-  return `${BACKEND_URL}${imagePath}`;
+const getImageUrl = (imageId: string): string => {
+  if (!imageId || imageId === 'null' || imageId === null || imageId === undefined || imageId === '') {
+    return '/images/Placeholder.png';
+  }
+  return `${BACKEND_URL}/api/admin/images/${imageId}`;
 };
 
 const Home = () => {
@@ -196,16 +196,22 @@ const Home = () => {
                 className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="relative h-64">
-                  {product.images && product.images.length > 0 ? (
+                  {product.images && product.images[0] ? (
                     <img
                       src={getImageUrl(product.images[0])}
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:opacity-75 transition-opacity duration-300"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/images/Placeholder.png';
+                      }}
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                      <span className="text-gray-400">No image available</span>
-                    </div>
+                    <img
+                      src="/images/Placeholder.png"
+                      alt={`${product.name} (no image)`}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
                   )}
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all" />
                 </div>

@@ -104,11 +104,11 @@ const ProductDetail: React.FC = () => {
   }
 
   // Function to get the full image URL
-  const getImageUrl = (imagePath: string): string | undefined => {
-    if (!imagePath) return undefined;
-    if (imagePath.startsWith('data:')) return imagePath;
-    if (imagePath.startsWith('http')) return imagePath;
-    return `${API_URL}${imagePath}`;
+  const getImageUrl = (imageId: string): string => {
+    if (!imageId || imageId === 'null' || imageId === null || imageId === undefined || imageId === '') {
+      return '/images/Placeholder.png';
+    }
+    return `${API_URL}/api/admin/images/${imageId}`;
   };
 
   return (
@@ -117,16 +117,22 @@ const ProductDetail: React.FC = () => {
         {/* Image Gallery */}
         <div className="space-y-4">
           <div className="aspect-h-1 aspect-w-1 w-full">
-            {product.images && product.images.length > 0 ? (
+            {product.images && product.images[selectedImage] ? (
               <img
                 src={getImageUrl(product.images[selectedImage])}
                 alt={product.name}
                 className="h-full w-full object-cover object-center rounded-lg"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/images/Placeholder.png';
+                }}
               />
             ) : (
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
-                <span className="text-gray-400">No image available</span>
-              </div>
+              <img
+                src="/images/Placeholder.png"
+                alt={`${product.name} (no image)`}
+                className="h-full w-full object-cover object-center rounded-lg"
+              />
             )}
           </div>
           {product.images && product.images.length > 1 && (
@@ -143,6 +149,10 @@ const ProductDetail: React.FC = () => {
                     src={getImageUrl(image)}
                     alt={`${product.name} - View ${index + 1}`}
                     className="h-full w-full object-cover object-center"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/images/Placeholder.png';
+                    }}
                   />
                 </div>
               ))}
