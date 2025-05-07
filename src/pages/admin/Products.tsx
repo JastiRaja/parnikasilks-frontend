@@ -147,20 +147,21 @@ const AdminProducts: React.FC = () => {
                   <tr key={product._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="h-16 w-16 overflow-hidden rounded">
-                        {product.images && product.images.length > 0 ? (
+                        {product.images && product.images[0] ? (
                           <img
-                            src={`${BACKEND_URL}/api/admin/images/${product.images[0]}`}
+                            src={product.images[0] && product.images[0] !== 'null' && product.images[0] !== null && product.images[0] !== undefined && product.images[0] !== ''
+                              ? `${BACKEND_URL}/api/admin/images/${product.images[0]}`
+                              : '/images/placeholder.jpg'}
                             alt={product.name}
                             className="h-full w-full object-cover"
                             onError={(e) => {
-                              console.error('Failed to load image:', `${BACKEND_URL}/api/admin/images/${product.images[0]}`);
                               const target = e.target as HTMLImageElement;
-                              target.src = '/images/Placeholder.png';
+                              target.src = '/images/placeholder.jpg';
                             }}
                           />
                         ) : (
                           <img
-                            src="/images/Placeholder.png"
+                            src="/images/placeholder.jpg"
                             alt={`${product.name} (no image)`}
                             className="h-full w-full object-cover"
                           />
