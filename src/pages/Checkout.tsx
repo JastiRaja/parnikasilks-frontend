@@ -66,6 +66,13 @@ const Checkout: React.FC = () => {
   });
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
   const [editAddress, setEditAddress] = useState<Address | null>(null);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({
+    transactionId: '',
+    paymentDate: '',
+    amount: ''
+  });
+  const [submittingPayment, setSubmittingPayment] = useState(false);
   const navigate = useNavigate();
   const { clearCart } = useCart();
 
@@ -199,6 +206,68 @@ const Checkout: React.FC = () => {
     }
   };
 
+  const handlePaymentFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPaymentForm({ ...paymentForm, [e.target.name]: e.target.value });
+  };
+
+  const handlePaymentFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingPayment(true);
+    setError(null);
+    try {
+      // Place the order first
+      if (!selectedAddressId) {
+        setError('Please select a delivery address.');
+        setSubmittingPayment(false);
+        return;
+      }
+      const selectedAddress = userAddresses.find(addr => addr._id === selectedAddressId);
+      if (!selectedAddress) {
+        setError('Selected address not found.');
+        setSubmittingPayment(false);
+        return;
+      }
+      if (!cartItems.length) {
+        throw new Error('Cart is empty');
+      }
+      const orderData = {
+        items: cartItems.map(item => ({
+          product: item._id,
+          quantity: item.quantity,
+          price: typeof item.price === 'string' ? parseFloat(item.price) : item.price
+        })),
+        shippingAddress: {
+          fullName: selectedAddress.fullName,
+          addressLine1: selectedAddress.addressLine1,
+          addressLine2: selectedAddress.addressLine2,
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+          postalCode: String(selectedAddress.pincode),
+          phone: selectedAddress.phone
+        },
+        paymentMethod,
+        totalAmount: calculateTotal()
+      };
+      const response = await axios.post('/api/orders', orderData);
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to create order');
+      }
+      // Send payment details
+      await axios.post(`/api/admin/orders/${response.data.order._id}/payment-details`, paymentForm);
+      // Clear cart
+      clearCart();
+      localStorage.removeItem('cart');
+      toast.success('Order and payment details submitted!');
+      navigate('/my-orders');
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to submit payment details.';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setSubmittingPayment(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -277,8 +346,12 @@ const Checkout: React.FC = () => {
         toast(String(emailResult.message));
       }
 
-      // Navigate to order confirmation
-      navigate(`/order-confirmation/${response.data.order._id}`);
+      // Navigate to order confirmation or payment details form
+      if (paymentMethod === 'online') {
+        navigate(`/order-payment-details/${response.data.order._id}`);
+      } else {
+        navigate(`/order-confirmation/${response.data.order._id}`);
+      }
     } catch (err: any) {
       console.error('Error placing order:', err);
       const errorMessage = err.response?.data?.message || err.message || 'Failed to place order. Please try again.';
@@ -618,16 +691,16 @@ const Checkout: React.FC = () => {
             <input
               type="radio"
               name="paymentMethod"
-              value="upi"
-              checked={paymentMethod === 'upi'}
-              onChange={() => setPaymentMethod('upi')}
+              value="online"
+              checked={paymentMethod === 'online'}
+              onChange={() => setPaymentMethod('online')}
               className="mr-2 accent-pink-600"
             />
             UPI Payment
           </label>
         </div>
       </div>
-      {paymentMethod === 'upi' && (
+      {paymentMethod === 'online' && (
         <div className="mb-6 flex flex-col items-center">
           <h3 className="text-lg font-semibold mb-2">Scan to Pay with UPI</h3>
           <QRCode
@@ -636,6 +709,58 @@ const Checkout: React.FC = () => {
           />
           <p className="mt-2 text-gray-600 text-sm">UPI ID: <span className="font-mono">jastiraja500@sbi</span></p>
           <p className="text-gray-500 text-xs">Scan this QR code with any UPI app to pay ₹{calculateTotal()}.</p>
+          {!showPaymentForm && (
+            <button
+              className="mt-4 px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              onClick={() => setShowPaymentForm(true)}
+            >
+              Done
+            </button>
+          )}
+          {showPaymentForm && (
+            <form className="mt-4 w-full max-w-sm space-y-4" onSubmit={handlePaymentFormSubmit}>
+              <div>
+                <label className="block mb-1">Transaction ID</label>
+                <input
+                  type="text"
+                  name="transactionId"
+                  value={paymentForm.transactionId}
+                  onChange={handlePaymentFormChange}
+                  required
+                  className="w-full border rounded px-2 py-1"
+                />
+              </div>
+              <div>
+                <label className="block mb-1">Payment Date</label>
+                <input
+                  type="date"
+                  name="paymentDate"
+                  value={paymentForm.paymentDate}
+                  onChange={handlePaymentFormChange}
+                  required
+                  className="w-full border rounded px-2 py-1"
+                />
+              </div>
+              <div>
+                <label className="block mb-1">Amount Paid</label>
+                <input
+                  type="number"
+                  name="amount"
+                  value={paymentForm.amount}
+                  onChange={handlePaymentFormChange}
+                  required
+                  className="w-full border rounded px-2 py-1"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={submittingPayment}
+                className="bg-pink-600 text-white px-4 py-2 rounded"
+              >
+                {submittingPayment ? 'Submitting...' : 'Submit Payment Details'}
+              </button>
+            </form>
+          )}
         </div>
       )}
     </div>

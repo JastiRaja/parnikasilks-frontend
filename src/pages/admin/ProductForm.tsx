@@ -54,7 +54,7 @@ const ProductForm: React.FC = () => {
             const productData = response.data.product;
             setProduct({
               ...productData,
-              images: productData.images.map((img: string) => img)
+              images: productData.images ? productData.images.map((img: string) => img) : []
             });
             
             // Set preview images if there are any

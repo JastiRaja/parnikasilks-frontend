@@ -29,6 +29,12 @@ interface Order {
     postalCode: string;
     phone: string;
   };
+  paymentDetails?: {
+    paymentDate?: string;
+    amount?: number;
+    transactionId?: string;
+    verified?: boolean;
+  };
 }
 
 const Orders = () => {
@@ -132,93 +138,142 @@ const Orders = () => {
       <h1 className="text-2xl font-bold mb-6">Manage Orders</h1>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Order ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Customer
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Items
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Total
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {orders.map((order) => (
-              <tr key={order._id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    #{order.orderNumber || order._id.slice(-6)}
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900">{order.user?.name}</div>
-                  <div className="text-sm text-gray-500">{order.user?.email}</div>
-                  {order.shippingAddress && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      {order.shippingAddress.phone}
+        <div className="overflow-x-auto">
+          <table className="min-w-[1000px] divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Order ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Items
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Total
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Txn ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Paid Amt
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Paid Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Verified
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {orders.map((order) => (
+                <tr key={order._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      #{order.orderNumber || order._id.slice(-6)}
                     </div>
-                  )}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="text-sm text-gray-900">
-                    {order.items?.map((item, index) => (
-                      <div key={index} className="mb-1">
-                        {item.product?.name} × {item.quantity}
-                      </div>
-                    ))}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    ₹{order.totalAmount.toLocaleString()}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="relative">
-                    <select
-                      value={order.status}
-                      onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                      disabled={updatingStatus === order._id}
-                      className={`${getStatusColor(order.status)} pl-8 pr-4 py-1 rounded-full text-sm font-medium cursor-pointer border-2 border-transparent hover:border-gray-300 transition-colors appearance-none`}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                    <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
-                      {getStatusIcon(order.status)}
-                    </div>
-                    {updatingStatus === order._id && (
-                      <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-pink-500"></div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-900">{order.user?.name}</div>
+                    <div className="text-sm text-gray-500">{order.user?.email}</div>
+                    {order.shippingAddress && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        {order.shippingAddress.phone}
                       </div>
                     )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {formatDate(order.createdAt)}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-900">
+                      {order.items?.map((item, index) => (
+                        <div key={index} className="mb-1">
+                          {item.product?.name} × {item.quantity}
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      ₹{order.totalAmount.toLocaleString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="relative">
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                        disabled={updatingStatus === order._id}
+                        className={`${getStatusColor(order.status)} pl-8 pr-4 py-1 rounded-full text-sm font-medium cursor-pointer border-2 border-transparent hover:border-gray-300 transition-colors appearance-none`}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                      <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
+                        {getStatusIcon(order.status)}
+                      </div>
+                      {updatingStatus === order._id && (
+                        <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-pink-500"></div>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {formatDate(order.createdAt)}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {order.paymentDetails?.transactionId || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {order.paymentDetails?.amount ? `₹${order.paymentDetails.amount}` : '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {order.paymentDetails?.paymentDate
+                      ? new Date(order.paymentDetails.paymentDate).toLocaleDateString()
+                      : '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {order.paymentDetails?.verified ? (
+                      <span className="text-green-600">Verified</span>
+                    ) : (
+                      <span className="text-yellow-600">Not Verified</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {!order.paymentDetails?.verified && order.paymentDetails?.transactionId && (
+                      <button
+                        onClick={async () => {
+                          await api.post(`/api/admin/orders/${order._id}/verify-payment`);
+                          toast.success('Payment marked as verified!');
+                          fetchOrders();
+                        }}
+                        className="bg-green-600 text-white px-2 py-1 rounded"
+                      >
+                        Mark as Verified
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

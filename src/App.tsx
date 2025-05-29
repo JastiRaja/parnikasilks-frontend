@@ -26,18 +26,22 @@ import ScrollToTop from './components/ScrollToTop';
 import { CartProvider } from './context/CartContext';
 import About from './pages/About';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import PaymentDetailsForm from './pages/PaymentDetailsForm';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: (
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow">
-          <Outlet />
-        </main>
-        <Footer />
-      </div>
+      <CartProvider>
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-grow">
+            <Outlet />
+          </main>
+          <Footer />
+        </div>
+        <ToastContainer />
+      </CartProvider>
     ),
     children: [
       { path: '', element: <Home /> },
@@ -54,6 +58,7 @@ const router = createBrowserRouter([
       { path: 'addresses', element: <ProtectedRoute><ManageAddresses /></ProtectedRoute> },
       { path: 'my-orders', element: <ProtectedRoute><Orders /></ProtectedRoute> },
       { path: 'order-confirmation/:id', element: <ProtectedRoute><OrderConfirmation /></ProtectedRoute> },
+      { path: 'order-payment-details/:orderId', element: <PaymentDetailsForm /> },
       { path: 'admin/dashboard', element: <ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute> },
       { path: 'admin/products', element: <ProtectedRoute requireAdmin><AdminProducts /></ProtectedRoute> },
       { path: 'admin/products/new', element: <ProtectedRoute requireAdmin><ProductForm /></ProtectedRoute> },
@@ -70,12 +75,7 @@ const router = createBrowserRouter([
 });
 
 const App: React.FC = () => {
-  return (
-    <CartProvider>
-      <RouterProvider router={router} />
-      <ToastContainer />
-    </CartProvider>
-  );
+  return <RouterProvider router={router} />;
 };
 
 export default App;
