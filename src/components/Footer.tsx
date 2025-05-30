@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebook, FaInstagram, FaTwitter, FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaTwitter, FaEnvelope, FaPhone, FaYoutube} from 'react-icons/fa';
 
 const Footer: React.FC = () => {
   return (
@@ -47,7 +47,7 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-2 text-gray-400">
-              
+               
               <li className="flex items-center">
                 <FaPhone className="mr-2" />
                 <span>+91 9030389516</span>
@@ -80,12 +80,12 @@ const Footer: React.FC = () => {
                 <FaInstagram size={24} />
               </a>
               {/* <a
-                href="https://twitter.com/parnikasilks"
+                href="https://m.youtube.com/@parnikasilksofficial"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
               >
-                <FaTwitter size={24} />
+                <FaYoutube size={24} />
               </a> */}
             </div>
           </div>
