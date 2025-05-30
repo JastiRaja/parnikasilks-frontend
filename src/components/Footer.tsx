@@ -25,21 +25,21 @@ const Footer: React.FC = () => {
                   Home
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link to="/products" className="text-gray-400 hover:text-white transition-colors">
                   Products
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <Link to="/about" className="text-gray-400 hover:text-white transition-colors">
                   About Us
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link to="/contact" className="text-gray-400 hover:text-white transition-colors">
                   Contact
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
