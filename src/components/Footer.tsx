@@ -47,10 +47,7 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-2 text-gray-400">
-              <li className="flex items-center">
-                <FaMapMarkerAlt className="mr-2" />
-                <span>123 Silk Street, Hyderabad, Telangana 500001</span>
-              </li>
+              
               <li className="flex items-center">
                 <FaPhone className="mr-2" />
                 <span>+91 9030389516</span>
