@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebook, FaInstagram,GiRotaryPhone, FaEnvelope, FaPhone, FaYoutube} from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaEnvelope, FaYoutube} from 'react-icons/fa';
+import { GiRotaryPhone } from 'react-icons/gi';
 
 const Footer: React.FC = () => {
   return (
