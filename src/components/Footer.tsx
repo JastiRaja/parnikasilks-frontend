@@ -79,14 +79,14 @@ const Footer: React.FC = () => {
               >
                 <FaInstagram size={24} />
               </a>
-              {/* <a
+               <a
                 href="https://m.youtube.com/@parnikasilksofficial"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 <FaYoutube size={24} />
-              </a> */}
+              </a> 
             </div>
           </div>
         </div>
