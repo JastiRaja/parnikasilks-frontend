@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebook, FaInstagram, FaTwitter, FaEnvelope, FaPhone, FaYoutube} from 'react-icons/fa';
+import { FaFacebook, FaInstagram,GiRotaryPhone, FaEnvelope, FaPhone, FaYoutube} from 'react-icons/fa';
 
 const Footer: React.FC = () => {
   return (
@@ -49,7 +49,7 @@ const Footer: React.FC = () => {
             <ul className="space-y-2 text-gray-400">
                
               <li className="flex items-center">
-                <FaPhone className="mr-2" />
+                <GiRotaryPhone className="mr-2" />
                 <span>+91 9030389516</span>
               </li>
               <li className="flex items-center">
