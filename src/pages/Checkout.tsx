@@ -676,7 +676,7 @@ const Checkout: React.FC = () => {
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
         <div className="flex flex-col space-y-2">
-          <label className="flex items-center">
+          {/* <label className="flex items-center">
             <input
               type="radio"
               name="paymentMethod"
@@ -686,7 +686,7 @@ const Checkout: React.FC = () => {
               className="mr-2 accent-pink-600"
             />
             Cash on Delivery
-          </label>
+          </label> */}
           <label className="flex items-center">
             <input
               type="radio"
