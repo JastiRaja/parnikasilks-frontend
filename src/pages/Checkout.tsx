@@ -704,10 +704,10 @@ const Checkout: React.FC = () => {
         <div className="mb-6 flex flex-col items-center">
           <h3 className="text-lg font-semibold mb-2">Scan to Pay with UPI</h3>
           <QRCode
-            value={`upi://pay?pa=jastiraja500@sbi&pn=Parnika+Silks&am=${calculateTotal()}&cu=INR&tn=Order+Payment`}
+            value={`upi://pay?pa=9959430763@axl&pn=Parnika+Silks&am=${calculateTotal()}&cu=INR&tn=Order+Payment`}
             style={{ height: 200, width: 200 }}
           />
-          <p className="mt-2 text-gray-600 text-sm">UPI ID: <span className="font-mono">jastiraja500@sbi</span></p>
+          <p className="mt-2 text-gray-600 text-sm">UPI ID: <span className="font-mono">9959430763@axl</span></p>
           <p className="text-gray-500 text-xs">Scan this QR code with any UPI app to pay ₹{calculateTotal()}.</p>
           {!showPaymentForm && (
             <button
