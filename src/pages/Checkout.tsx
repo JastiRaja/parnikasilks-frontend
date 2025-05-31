@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 // @ts-ignore
 import QRCode from 'react-qr-code';
+import { FaMobileAlt } from 'react-icons/fa';
 
 interface CartItem {
   _id: string;
@@ -366,6 +367,26 @@ const Checkout: React.FC = () => {
     return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
   };
 
+  const generateUpiDeepLink = () => {
+    const upiId = '9959430763@axl';
+    const amount = calculateTotal();
+    const merchantName = 'Parnika Silks';
+    const transactionNote = 'Order Payment';
+    
+    // Create UPI deep link URL
+    const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(transactionNote)}`;
+    return upiUrl;
+  };
+
+  const handleOpenUpiApp = () => {
+    const upiUrl = generateUpiDeepLink();
+    window.location.href = upiUrl;
+  };
+
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
   if (loading && cartItems.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -702,13 +723,32 @@ const Checkout: React.FC = () => {
       </div>
       {paymentMethod === 'online' && (
         <div className="mb-6 flex flex-col items-center">
-          <h3 className="text-lg font-semibold mb-2">Scan to Pay with UPI</h3>
-          <QRCode
-            value={`upi://pay?pa=9959430763@axl&pn=Parnika+Silks&am=${calculateTotal()}&cu=INR&tn=Order+Payment`}
-            style={{ height: 200, width: 200 }}
-          />
-          <p className="mt-2 text-gray-600 text-sm">UPI ID: <span className="font-mono">9959430763@axl</span></p>
-          <p className="text-gray-500 text-xs">Scan this QR code with any UPI app to pay ₹{calculateTotal()}.</p>
+          <h3 className="text-lg font-semibold mb-2">Pay with UPI</h3>
+          
+          {isMobileDevice() ? (
+            <div className="text-center">
+              <button
+                onClick={handleOpenUpiApp}
+                className="flex items-center justify-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <FaMobileAlt className="text-xl" />
+                <span>Open UPI App</span>
+              </button>
+              <p className="mt-2 text-gray-600 text-sm">
+                This will open your default UPI app with pre-filled payment details
+              </p>
+            </div>
+          ) : (
+            <>
+              <QRCode
+                value={generateUpiDeepLink()}
+                style={{ height: 200, width: 200 }}
+              />
+              <p className="mt-2 text-gray-600 text-sm">UPI ID: <span className="font-mono">9959430763@axl</span></p>
+              <p className="text-gray-500 text-xs">Scan this QR code with any UPI app to pay ₹{calculateTotal()}.</p>
+            </>
+          )}
+          
           {!showPaymentForm && (
             <button
               className="mt-4 px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
@@ -717,6 +757,7 @@ const Checkout: React.FC = () => {
               Done
             </button>
           )}
+          
           {showPaymentForm && (
             <form className="mt-4 w-full max-w-sm space-y-4" onSubmit={handlePaymentFormSubmit}>
               <div>
