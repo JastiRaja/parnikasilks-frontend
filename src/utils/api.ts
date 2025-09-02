@@ -1,8 +1,7 @@
 import axios from 'axios';
 import { API_URL } from '../config';
 
-// Log the API URL to debug
-console.log('API_URL in api.ts:', API_URL);
+// API URL configuration
 
 const api = axios.create({
   baseURL: API_URL,
