@@ -240,7 +240,28 @@ const OrderConfirmation: React.FC = () => {
                 </div>
                 <div className="flex justify-between mb-2">
                   <span>Total Amount</span>
-                  <span className="font-medium">₹{order.totalAmount.toLocaleString()}</span>
+                  <div className="space-y-2">
+                    {order.subtotal && order.subtotal !== order.totalAmount && (
+                      <>
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>Subtotal</span>
+                          <span>₹{order.subtotal.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm text-gray-600">
+                          <span>Delivery Charges</span>
+                          {order.deliveryCharges === 0 ? (
+                            <span className="text-green-600 font-semibold">Free</span>
+                          ) : (
+                            <span>₹{order.deliveryCharges?.toLocaleString() || '0'}</span>
+                          )}
+                        </div>
+                      </>
+                    )}
+                    <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
+                      <span>Total</span>
+                      <span className="font-medium">₹{order.totalAmount.toLocaleString()}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

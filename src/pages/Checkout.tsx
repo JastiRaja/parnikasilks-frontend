@@ -13,6 +13,8 @@ interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  deliveryCharges?: number;
+  deliveryChargesApplicable?: boolean;
 }
 
 interface Address {
@@ -79,9 +81,36 @@ const Checkout: React.FC = () => {
   useEffect(() => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     setCartItems(cart);
+    fetchProductDetails(cart);
     fetchUserAddresses();
     setLoading(false);
   }, []);
+
+  const fetchProductDetails = async (cart: CartItem[]) => {
+    try {
+      // Fetch product details for all cart items to get delivery charges
+      const productPromises = cart.map(item => 
+        axios.get(`/api/products/${item._id}`).catch(() => null)
+      );
+      const productResponses = await Promise.all(productPromises);
+      
+      const updatedCart = cart.map((item, index) => {
+        const productResponse = productResponses[index];
+        if (productResponse?.data?.success && productResponse.data.product) {
+          return {
+            ...item,
+            deliveryCharges: productResponse.data.product.deliveryCharges || 0,
+            deliveryChargesApplicable: productResponse.data.product.deliveryChargesApplicable !== false
+          };
+        }
+        return item;
+      });
+      
+      setCartItems(updatedCart);
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+    }
+  };
 
   const fetchUserAddresses = async () => {
     try {
@@ -362,8 +391,32 @@ const Checkout: React.FC = () => {
     }
   };
 
-  const calculateTotal = () => {
+  const calculateSubtotal = () => {
     return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  const calculateDeliveryCharges = () => {
+    const FREE_DELIVERY_THRESHOLD = 1000;
+    const subtotal = calculateSubtotal();
+    
+    // If order total >= ₹1000, delivery is free
+    if (subtotal >= FREE_DELIVERY_THRESHOLD) {
+      return 0;
+    }
+    
+    // Calculate delivery charges for items that have delivery charges applicable
+    let deliveryCharges = 0;
+    cartItems.forEach(item => {
+      if (item.deliveryChargesApplicable !== false && item.deliveryCharges) {
+        deliveryCharges += (item.deliveryCharges * item.quantity);
+      }
+    });
+    
+    return deliveryCharges;
+  };
+
+  const calculateTotal = () => {
+    return calculateSubtotal() + calculateDeliveryCharges();
   };
 
   const generateUpiDeepLink = () => {
@@ -961,12 +1014,21 @@ const Checkout: React.FC = () => {
               <div className="space-y-3 mb-6 pt-4 border-t border-gray-200">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>₹{calculateTotal().toLocaleString()}</span>
+                  <span>₹{calculateSubtotal().toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Shipping</span>
-                  <span className="text-green-600">Free</span>
+                  <span>Delivery Charges</span>
+                  {calculateDeliveryCharges() === 0 ? (
+                    <span className="text-green-600 font-semibold">Free</span>
+                  ) : (
+                    <span>₹{calculateDeliveryCharges().toLocaleString()}</span>
+                  )}
                 </div>
+                {calculateSubtotal() < 1000 && calculateDeliveryCharges() > 0 && (
+                  <div className="text-xs text-gray-500 italic">
+                    💡 Free delivery on orders above ₹1000
+                  </div>
+                )}
                 <div className="flex justify-between text-2xl font-bold text-gray-900 pt-3 border-t border-gray-200">
                   <span>Total</span>
                   <span className="text-pink-600">₹{calculateTotal().toLocaleString()}</span>

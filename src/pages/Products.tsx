@@ -11,6 +11,10 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
+  deliveryCharges?: number;
+  deliveryChargesApplicable?: boolean;
   images: string[];
   category: string;
   stock: number;
@@ -260,9 +264,30 @@ const Products: React.FC = () => {
                     {product.description}
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-primary">
-                      ₹{product.price.toLocaleString()}
-                    </span>
+                    <div className="flex flex-col">
+                      <span className="text-lg font-bold text-primary">
+                        ₹{product.price.toLocaleString()}
+                      </span>
+                      {product.originalPrice && product.originalPrice > product.price && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-gray-500 line-through">
+                            ₹{product.originalPrice.toLocaleString()}
+                          </span>
+                          {product.discountPercentage && product.discountPercentage > 0 && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-semibold">
+                              {product.discountPercentage}% OFF
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {product.deliveryChargesApplicable !== false && product.deliveryCharges !== undefined && product.deliveryCharges > 0 && (
+                        <div className="text-xs text-gray-600 mt-1">
+                          <span className="text-gray-500">Delivery: </span>
+                          <span className="font-medium">₹{product.deliveryCharges.toLocaleString()}</span>
+                          <span className="text-green-600 ml-1">(Free above ₹1,000)</span>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleAddToCart(product)}

@@ -11,6 +11,10 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
+  deliveryCharges?: number;
+  deliveryChargesApplicable?: boolean;
   images: string[];
   category: string;
   stock: number;
@@ -276,7 +280,7 @@ const Home = () => {
                 {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {filteredProducts.map((product, index) => (
                 <Link
                   key={product._id}
@@ -284,7 +288,7 @@ const Home = () => {
                   className="group bg-white rounded-2xl shadow-soft overflow-hidden hover:shadow-large transition-all duration-300 transform hover:-translate-y-2 animate-fade-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className="relative h-80 overflow-hidden bg-gray-100">
+                  <div className="relative h-64 overflow-hidden bg-gray-100">
                     {product.images && product.images[0] ? (
                       <img
                         src={getImageUrl(product.images[0])}
@@ -318,21 +322,40 @@ const Home = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="p-5">
+                  <div className="p-4">
                     <div className="mb-2">
-                      <span className="inline-block bg-pink-100 text-pink-700 text-xs font-semibold px-3 py-1 rounded-full capitalize">
+                      <span className="inline-block bg-pink-100 text-pink-700 text-xs font-semibold px-2 py-1 rounded-full capitalize">
                         {product.category}
                       </span>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-pink-600 transition-colors">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1.5 line-clamp-1 group-hover:text-pink-600 transition-colors">
                       {product.name}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 min-h-[2.5rem]">
+                    <p className="text-xs text-gray-600 mb-3 line-clamp-2 min-h-[2rem]">
                       {product.description}
                     </p>
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                      <div>
-                        <span className="text-2xl font-bold text-pink-600">₹{product.price.toLocaleString()}</span>
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <div className="flex flex-col">
+                        <span className="text-xl font-bold text-pink-600">₹{product.price.toLocaleString()}</span>
+                        {product.originalPrice && product.originalPrice > product.price && (
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-xs text-gray-500 line-through">
+                              ₹{product.originalPrice.toLocaleString()}
+                            </span>
+                            {product.discountPercentage && product.discountPercentage > 0 && (
+                              <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-semibold">
+                                {product.discountPercentage}% OFF
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {product.deliveryChargesApplicable !== false && product.deliveryCharges !== undefined && product.deliveryCharges > 0 && (
+                          <div className="text-xs text-gray-600 mt-0.5">
+                            <span className="text-gray-500">Delivery: </span>
+                            <span className="font-medium">₹{product.deliveryCharges.toLocaleString()}</span>
+                            <span className="text-green-600 ml-1 text-xs">(Free ₹1k+)</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

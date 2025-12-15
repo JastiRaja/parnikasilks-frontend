@@ -82,7 +82,7 @@ const Carousel: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="relative w-full h-[400px] md:h-[450px] lg:h-[500px] flex items-center justify-center bg-gradient-to-br from-pink-50 to-yellow-50">
+      <div className="relative w-full h-[300px] md:h-[350px] lg:h-[400px] flex items-center justify-center bg-gradient-to-br from-pink-50 to-yellow-50">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
       </div>
     );
@@ -94,7 +94,7 @@ const Carousel: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full h-[400px] md:h-[450px] lg:h-[500px] overflow-hidden bg-gradient-to-br from-pink-50 to-yellow-50">
+    <div className="relative w-full h-[300px] md:h-[350px] lg:h-[400px] overflow-hidden bg-gradient-to-br from-pink-50 to-yellow-50">
       {slides.map((slide, index) => (
         <div
           key={slide._id}
@@ -118,18 +118,18 @@ const Carousel: React.FC = () => {
             <div className="absolute inset-0 flex items-center pointer-events-none">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                 <div className="max-w-xl md:max-w-2xl text-white animate-slide-up">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold mb-3 md:mb-4 drop-shadow-lg">
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-serif font-bold mb-2 md:mb-3 drop-shadow-lg">
                     {slide.title}
                   </h2>
                   {slide.description && (
-                    <p className="text-base md:text-lg mb-6 md:mb-8 text-gray-100 drop-shadow-md line-clamp-2">
+                    <p className="text-sm md:text-base mb-4 md:mb-6 text-gray-100 drop-shadow-md line-clamp-2">
                       {slide.description}
                     </p>
                   )}
                   {slide.link && (
                     <Link
                       to={slide.link}
-                      className="inline-block px-6 py-3 md:px-8 md:py-4 bg-pink-600 text-white rounded-lg font-semibold text-base md:text-lg hover:bg-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 pointer-events-auto"
+                      className="inline-block px-5 py-2 md:px-6 md:py-3 bg-pink-600 text-white rounded-lg font-semibold text-sm md:text-base hover:bg-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1 pointer-events-auto"
                     >
                       {slide.linkText || 'Shop Now'}
                     </Link>

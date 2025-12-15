@@ -4,13 +4,17 @@ import axios from '../utils/axios';
 import { toast } from 'react-toastify';
 import { useCart } from '../context/CartContext';
 import { API_URL } from '../config';
-import { FaShoppingCart, FaCheck, FaTimes, FaTag, FaPalette, FaBox, FaArrowLeft, FaRupeeSign, FaCheckCircle, FaStar, FaHeart, FaShare } from 'react-icons/fa';
+import { FaShoppingCart, FaCheck, FaTimes, FaTag, FaPalette, FaBox, FaArrowLeft, FaRupeeSign, FaCheckCircle, FaStar, FaHeart, FaShare, FaTruck } from 'react-icons/fa';
 
 interface Product {
   _id: string;
   name: string;
   description: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
+  deliveryCharges?: number;
+  deliveryChargesApplicable?: boolean;
   images: string[];
   category: string;
   stock: number;
@@ -39,6 +43,9 @@ const ProductDetail: React.FC = () => {
         console.log('Product response:', response);
         
         if (response.data.success) {
+          console.log('Product data received:', response.data.product);
+          console.log('Delivery charges:', response.data.product.deliveryCharges);
+          console.log('Delivery charges applicable:', response.data.product.deliveryChargesApplicable);
           setProduct(response.data.product);
         } else {
           setError('Product not found');
@@ -254,8 +261,57 @@ const ProductDetail: React.FC = () => {
               <span className="text-5xl font-extrabold bg-gradient-to-r from-pink-600 via-pink-500 to-purple-600 bg-clip-text text-transparent">
                 ₹{product?.price.toLocaleString()}
               </span>
-              <span className="text-lg text-gray-500 line-through">₹{(product?.price * 1.2).toLocaleString()}</span>
-              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">20% OFF</span>
+              {product?.originalPrice && product.originalPrice > product.price && (
+                <>
+                  <span className="text-lg text-gray-500 line-through">₹{product.originalPrice.toLocaleString()}</span>
+                  {product.discountPercentage && product.discountPercentage > 0 && (
+                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">
+                      {product.discountPercentage}% OFF
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Delivery Charges Information */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200/50 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg mt-0.5">
+                  <FaTruck className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                    Delivery Information
+                  </h4>
+                  {(() => {
+                    // Check if delivery charges should be displayed
+                    const hasDeliveryCharges = product?.deliveryCharges !== undefined && product.deliveryCharges !== null && product.deliveryCharges > 0;
+                    const isApplicable = product?.deliveryChargesApplicable !== false; // true or undefined means applicable
+                    
+                    if (hasDeliveryCharges && isApplicable) {
+                      return (
+                        <div className="space-y-1 text-sm">
+                          <p className="text-gray-700">
+                            <span className="font-medium">Delivery Charges:</span>{' '}
+                            <span className="text-pink-600 font-semibold">₹{product.deliveryCharges.toLocaleString()}</span>
+                          </p>
+                          <p className="text-green-600 font-medium flex items-center gap-1">
+                            <FaCheckCircle className="h-3 w-3" />
+                            Free delivery on orders above ₹1,000
+                          </p>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <p className="text-green-600 font-medium flex items-center gap-1">
+                          <FaCheckCircle className="h-3 w-3" />
+                          Free delivery available
+                        </p>
+                      );
+                    }
+                  })()}
+                </div>
+              </div>
             </div>
 
             {/* Description */}

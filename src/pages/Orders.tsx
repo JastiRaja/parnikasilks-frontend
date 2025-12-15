@@ -8,6 +8,8 @@ interface Order {
   _id: string;
   orderNumber: string;
   totalAmount: number;
+  subtotal?: number;
+  deliveryCharges?: number;
   status: string;
   createdAt: string;
   expectedDeliveryDate?: string;
@@ -252,16 +254,39 @@ const Orders: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-              <span className="text-lg font-semibold text-gray-800">
-                Total: ₹{order.totalAmount.toLocaleString()}
-              </span>
-              <Link
-                to={`/order-confirmation/${order._id}`}
-                className="text-pink-600 hover:text-pink-700 font-medium"
-              >
-                View Details
-              </Link>
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex justify-between items-center mb-2">
+                {order.subtotal && order.subtotal !== order.totalAmount ? (
+                  <div className="space-y-1">
+                    <div className="text-sm text-gray-600 flex justify-between">
+                      <span>Subtotal:</span>
+                      <span>₹{order.subtotal.toLocaleString()}</span>
+                    </div>
+                    <div className="text-sm text-gray-600 flex justify-between">
+                      <span>Delivery:</span>
+                      {order.deliveryCharges === 0 ? (
+                        <span className="text-green-600 font-semibold">Free</span>
+                      ) : (
+                        <span>₹{order.deliveryCharges?.toLocaleString() || '0'}</span>
+                      )}
+                    </div>
+                    <div className="text-lg font-semibold text-gray-800 flex justify-between pt-1 border-t border-gray-200">
+                      <span>Total:</span>
+                      <span>₹{order.totalAmount.toLocaleString()}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <span className="text-lg font-semibold text-gray-800">
+                    Total: ₹{order.totalAmount.toLocaleString()}
+                  </span>
+                )}
+                <Link
+                  to={`/order-confirmation/${order._id}`}
+                  className="text-pink-600 hover:text-pink-700 font-medium"
+                >
+                  View Details
+                </Link>
+              </div>
             </div>
           </div>
         ))}

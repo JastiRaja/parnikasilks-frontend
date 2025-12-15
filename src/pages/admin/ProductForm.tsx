@@ -9,6 +9,10 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  originalPrice?: number;
+  discountPercentage?: number;
+  deliveryCharges?: number;
+  deliveryChargesApplicable?: boolean;
   category: string;
   images: (string | File)[];
   stock: number;
@@ -36,6 +40,8 @@ const ProductForm: React.FC = () => {
     category: '',
     images: [],
     stock: 0,
+    deliveryCharges: 0,
+    deliveryChargesApplicable: true,
     specifications: {
       material: '',
       color: '',
@@ -134,6 +140,22 @@ const ProductForm: React.FC = () => {
       formData.append('price', product.price.toString());
       formData.append('category', product.category);
       formData.append('stock', product.stock.toString());
+      
+      // Append original price and discount if provided
+      if (product.originalPrice) {
+        formData.append('originalPrice', product.originalPrice.toString());
+      }
+      if (product.discountPercentage !== undefined) {
+        formData.append('discountPercentage', product.discountPercentage.toString());
+      }
+      
+      // Append delivery charges
+      if (product.deliveryCharges !== undefined) {
+        formData.append('deliveryCharges', product.deliveryCharges.toString());
+      }
+      if (product.deliveryChargesApplicable !== undefined) {
+        formData.append('deliveryChargesApplicable', product.deliveryChargesApplicable.toString());
+      }
       
       // Append specifications as a JSON string
       formData.append('specifications', JSON.stringify(product.specifications));
@@ -263,7 +285,7 @@ const ProductForm: React.FC = () => {
               <div className="space-y-2">
                 <label className="flex items-center text-sm font-semibold text-gray-700">
                   <FaRupeeSign className="mr-2 text-pink-600" />
-                  <span>Price</span>
+                  <span>Selling Price</span>
                   <span className="text-red-500 ml-1">*</span>
                 </label>
                 <div className="relative">
@@ -271,7 +293,21 @@ const ProductForm: React.FC = () => {
                   <input
                     type="number"
                     value={product.price || ''}
-                    onChange={(e) => setProduct({ ...product, price: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => {
+                      const newPrice = parseFloat(e.target.value) || 0;
+                      let discountPercentage = product.discountPercentage || 0;
+                      
+                      // Auto-calculate discount if originalPrice is set
+                      if (product.originalPrice && product.originalPrice > 0 && product.originalPrice >= newPrice) {
+                        discountPercentage = ((product.originalPrice - newPrice) / product.originalPrice) * 100;
+                      }
+                      
+                      setProduct({ 
+                        ...product, 
+                        price: newPrice,
+                        discountPercentage: Math.round(discountPercentage)
+                      });
+                    }}
                     className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none"
                     placeholder="0.00"
                     required
@@ -279,6 +315,48 @@ const ProductForm: React.FC = () => {
                     step="0.01"
                   />
                 </div>
+                <p className="text-xs text-gray-500">The price customers will pay</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <FaRupeeSign className="mr-2 text-pink-600" />
+                  <span>Original Price (Optional)</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                  <input
+                    type="number"
+                    value={product.originalPrice || ''}
+                    onChange={(e) => {
+                      const originalPrice = parseFloat(e.target.value) || 0;
+                      const sellingPrice = product.price || 0;
+                      let discountPercentage = 0;
+                      
+                      if (originalPrice > 0 && originalPrice >= sellingPrice) {
+                        discountPercentage = ((originalPrice - sellingPrice) / originalPrice) * 100;
+                      }
+                      
+                      setProduct({ 
+                        ...product, 
+                        originalPrice: originalPrice > 0 ? originalPrice : undefined,
+                        discountPercentage: Math.round(discountPercentage)
+                      });
+                    }}
+                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Original price before discount (leave empty if no discount)</p>
+                {product.originalPrice && product.originalPrice > 0 && product.price && (
+                  <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-sm text-green-700">
+                      Discount: <span className="font-bold">{product.discountPercentage || 0}% OFF</span>
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -296,6 +374,40 @@ const ProductForm: React.FC = () => {
                   required
                   min="0"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <FaRupeeSign className="mr-2 text-pink-600" />
+                  <span>Delivery Charges</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                  <input
+                    type="number"
+                    value={product.deliveryCharges || ''}
+                    onChange={(e) => setProduct({ ...product, deliveryCharges: parseFloat(e.target.value) || 0 })}
+                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    disabled={!product.deliveryChargesApplicable}
+                  />
+                </div>
+                <p className="text-xs text-gray-500">Delivery charges for this product (Free if order total ≥ ₹1000)</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={product.deliveryChargesApplicable !== false}
+                    onChange={(e) => setProduct({ ...product, deliveryChargesApplicable: e.target.checked })}
+                    className="mr-2 h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded"
+                  />
+                  <span>Delivery Charges Applicable</span>
+                </label>
+                <p className="text-xs text-gray-500">Uncheck if this product has free delivery regardless of order total</p>
               </div>
             </div>
 
