@@ -5,7 +5,8 @@ import {
   Package, 
   Users, 
   ShoppingBag,
-  LogOut 
+  LogOut,
+  Image
 } from 'lucide-react';
 
 const AdminSidebar = () => {
@@ -34,6 +35,16 @@ const AdminSidebar = () => {
           >
             <Package className="h-5 w-5" />
             <span>Products</span>
+          </Link>
+          
+          <Link
+            to="/admin/slides"
+            className={`flex items-center space-x-2 p-2 rounded-lg ${
+              isActive('/admin/slides') ? 'bg-pink-100 text-pink-600' : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <Image className="h-5 w-5" />
+            <span>Slides</span>
           </Link>
           
           <Link

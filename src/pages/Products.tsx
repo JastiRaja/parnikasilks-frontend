@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from '../utils/axios';
 import { FaSearch, FaFilter, FaSortAmountDown, FaSortAmountUp, FaShoppingCart } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { useCart } from '../context/CartContext';
-import { API_URL } from '../config';
+import { BACKEND_URL } from '../utils/constants';
 
 interface Product {
   _id: string;
@@ -17,11 +17,15 @@ interface Product {
 }
 
 const Products: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [category, setCategory] = useState('all');
+  const [category, setCategory] = useState(() => {
+    // Read category from URL query params on initial load
+    return searchParams.get('category') || 'all';
+  });
   const [sortBy, setSortBy] = useState('price');
   const [sortOrder, setSortOrder] = useState('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,11 +33,30 @@ const Products: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const getImageUrl = (imagePath: string): string | undefined => {
-    if (!imagePath) return undefined;
-    if (imagePath.startsWith('data:')) return imagePath;
-    if (imagePath.startsWith('http')) return imagePath;
-    return `${API_URL}${imagePath}`;
+  // Update category when URL query param changes
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setCategory(categoryParam);
+    } else {
+      setCategory('all');
+    }
+  }, [searchParams]);
+
+  const getImageUrl = (imageId: string): string => {
+    if (!imageId || imageId === 'null' || imageId === null || imageId === undefined || imageId === '') {
+      return '/images/Placeholder.png';
+    }
+    // If it's already a full URL, return it
+    if (imageId.startsWith('http')) {
+      return imageId;
+    }
+    // If it's a data URL, return it
+    if (imageId.startsWith('data:')) {
+      return imageId;
+    }
+    // Otherwise, construct the GridFS image URL
+    return `${BACKEND_URL}/api/admin/images/${imageId}`;
   };
 
   const itemsPerPage = 12;
@@ -45,6 +68,7 @@ const Products: React.FC = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await axios.get('/api/products', {
         params: {
           page: currentPage,
@@ -52,15 +76,33 @@ const Products: React.FC = () => {
           category: category !== 'all' ? category : undefined,
           sortBy,
           sortOrder,
-          search: searchTerm
-        }
+          search: searchTerm || undefined
+        },
+        timeout: 30000 // 30 second timeout
       });
-      setProducts(response.data.products);
-      setTotalPages(Math.ceil(response.data.total / itemsPerPage));
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch products. Please try again later.');
+      
+      if (response.data.success) {
+        setProducts(response.data.products || []);
+        setTotalPages(response.data.totalPages || Math.ceil((response.data.total || 0) / itemsPerPage));
+      } else {
+        setError(response.data.message || 'Failed to fetch products');
+      }
+    } catch (err: any) {
       console.error('Error fetching products:', err);
+      if (err.code === 'ECONNABORTED') {
+        setError('Request timeout. The server is taking too long to respond. Please check your connection and try again.');
+      } else if (err.response) {
+        const errorMsg = err.response.data?.message || 'Failed to fetch products';
+        if (err.response.status === 503) {
+          setError('Database connection unavailable. Please check the server connection and try again.');
+        } else if (err.response.status === 500) {
+          setError('Server error. Please try again later or contact support.');
+        } else {
+          setError(errorMsg);
+        }
+      } else {
+        setError('Network error. Please check your connection and try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -106,7 +148,7 @@ const Products: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 mt-16">
           <h1 className="text-3xl font-bold text-gray-900">Our Collection</h1>
           <p className="mt-2 text-gray-600">
             Discover our exquisite collection of traditional and contemporary sarees
@@ -180,17 +222,34 @@ const Products: React.FC = () => {
                 key={product._id}
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
-                <div className="relative pb-[100%]">
-                  {product.images && product.images.length > 0 ? (
+                <div className="relative pb-[100%] bg-gray-100">
+                  {product.images && product.images.length > 0 && product.images[0] ? (
                     <img
                       src={getImageUrl(product.images[0])}
                       alt={product.name}
                       className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/images/Placeholder.png';
+                      }}
                     />
                   ) : (
                     <div className="absolute inset-0 w-full h-full bg-gray-100 flex items-center justify-center">
-                      <span className="text-gray-400">No image</span>
+                      <img
+                        src="/images/Placeholder.png"
+                        alt={`${product.name} (no image)`}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
+                  )}
+                  {product.stock > 0 ? (
+                    <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-md">
+                      In Stock
+                    </span>
+                  ) : (
+                    <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full shadow-md">
+                      Out of Stock
+                    </span>
                   )}
                 </div>
                 <div className="p-4">

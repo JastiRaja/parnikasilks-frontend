@@ -5,7 +5,7 @@ const About: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8 text-center">About Parnika Silks</h1>
+        <h1 className="text-4xl font-bold text-gray-800 mb-8 mt-8 text-center">About Parnika Silks</h1>
         
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg shadow-md p-8 mb-8">

@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from '../../utils/axios';
-import { FaUpload, FaTrash } from 'react-icons/fa';
+import axios, { uploadInstance } from '../../utils/axios';
+import { FaUpload, FaTrash, FaTag, FaRupeeSign, FaBox, FaPalette, FaInfoCircle, FaImage, FaTimes } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
 interface Product {
@@ -15,7 +15,6 @@ interface Product {
   specifications: {
     material: string;
     color: string;
-   
   };
   // careInstructions: string;
 }
@@ -25,9 +24,11 @@ const categories = ['saree', 'dress', 'lehenga', 'salwar', 'other'];
 const ProductForm: React.FC = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
   const [product, setProduct] = useState<Product>({
     name: '',
     description: '',
@@ -80,16 +81,36 @@ const ProductForm: React.FC = () => {
     }
   }, [productId]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      const newPreviews = files.map(file => URL.createObjectURL(file));
+  const handleImageChange = (files: FileList | null) => {
+    if (files) {
+      const fileArray = Array.from(files);
+      const newPreviews = fileArray.map(file => URL.createObjectURL(file));
       setPreviewImages(prev => [...prev, ...newPreviews]);
       setProduct(prev => ({
         ...prev,
-        images: [...prev.images, ...files]
+        images: [...prev.images, ...fileArray]
       }));
     }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleImageChange(e.target.files);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleImageChange(e.dataTransfer.files);
   };
 
   const handleRemoveImage = (index: number) => {
@@ -130,8 +151,10 @@ const ProductForm: React.FC = () => {
         ? `/api/admin/products/${productId}`
         : '/api/admin/products';
         
+      // Use uploadInstance if there are images to upload (longer timeout)
+      const apiInstance = product.images.length > 0 ? uploadInstance : axios;
       const method = productId ? 'put' : 'post';
-      const response = await axios[method](url, formData, {
+      const response = await apiInstance[method](url, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -145,7 +168,11 @@ const ProductForm: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error submitting product:', error);
-      toast.error(error.response?.data?.message || 'Failed to save product');
+      if (error.code === 'ECONNABORTED') {
+        toast.error('Upload timeout. The files may be too large or connection is slow. Please try again.');
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to save product');
+      }
     } finally {
       setLoading(false);
     }
@@ -160,219 +187,307 @@ const ProductForm: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">
-        {productId ? 'Edit Product' : 'Add New Product'}
-      </h1>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
-            <input
-              type="text"
-              value={product.name}
-              onChange={(e) => setProduct({ ...product, name: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Category</label>
-            <select
-              value={product.category}
-              onChange={(e) => setProduct({ ...product, category: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-              required
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+      <div className="container mx-auto px-4 pt-24 pb-8 max-w-5xl">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-4xl font-bold text-gray-900">
+              {productId ? 'Edit Product' : 'Add New Product'}
+            </h1>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/products')}
+              className="text-gray-500 hover:text-gray-700 transition-colors"
             >
-              <option value="">Select a category</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category.charAt(0).toUpperCase() + category.slice(1)}
-                </option>
-              ))}
-            </select>
+              <FaTimes className="h-6 w-6" />
+            </button>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Price</label>
-            <input
-              type="number"
-              value={product.price || ''}
-              onChange={(e) => setProduct({ ...product, price: parseFloat(e.target.value) || 0 })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-              required
-              min="0"
-              step="0.01"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Stock</label>
-            <input
-              type="number"
-              value={product.stock || ''}
-              onChange={(e) => setProduct({ ...product, stock: parseInt(e.target.value) || 0 })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-              required
-              min="0"
-            />
-          </div>
+          <p className="text-gray-600">Fill in the details below to {productId ? 'update' : 'create'} your product</p>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Description</label>
-          <textarea
-            value={product.description}
-            onChange={(e) => setProduct({ ...product, description: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-            rows={4}
-            required
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Material</label>
-            <input
-              type="text"
-              value={product.specifications.material}
-              onChange={(e) => setProduct({
-                ...product,
-                specifications: { ...product.specifications, material: e.target.value }
-              })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Color</label>
-            <input
-              type="text"
-              value={product.specifications.color}
-              onChange={(e) => setProduct({
-                ...product,
-                specifications: { ...product.specifications, color: e.target.value }
-              })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-              required
-            />
-          </div>
-
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700">Size</label>
-            <input
-              type="text"
-              value={product.specifications.size}
-              onChange={(e) => setProduct({
-                ...product,
-                specifications: { ...product.specifications, size: e.target.value }
-              })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-              required
-            />
-          </div> */}
-
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700">Weight</label>
-            <input
-              type="text"
-              value={product.specifications.weight}
-              onChange={(e) => setProduct({
-                ...product,
-                specifications: { ...product.specifications, weight: e.target.value }
-              })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-              required
-            />
-          </div> */}
-        </div>
-
-        {/* <div>
-          <label className="block text-sm font-medium text-gray-700">Care Instructions</label>
-          <textarea
-            value={product.careInstructions}
-            onChange={(e) => setProduct({ ...product, careInstructions: e.target.value })}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-            rows={4}
-            required
-          />
-        </div> */}
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Images</label>
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-            <div className="space-y-1 text-center">
-              <FaUpload className="mx-auto h-12 w-12 text-gray-400" />
-              <div className="flex text-sm text-gray-600">
-                <label
-                  htmlFor="file-upload"
-                  className="relative cursor-pointer bg-white rounded-md font-medium text-pink-600 hover:text-pink-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-pink-500"
-                >
-                  <span>Upload files</span>
-                  <input
-                    id="file-upload"
-                    name="images"
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="sr-only"
-                  />
-                </label>
-                <p className="pl-1">or drag and drop</p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information Card */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center mb-6">
+              <div className="bg-pink-100 p-2 rounded-lg mr-3">
+                <FaInfoCircle className="h-5 w-5 text-pink-600" />
               </div>
-              <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</p>
+              <h2 className="text-xl font-semibold text-gray-800">Basic Information</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <span className="mr-2">Product Name</span>
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={product.name}
+                    onChange={(e) => setProduct({ ...product, name: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none"
+                    placeholder="Enter product name"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <FaTag className="mr-2 text-pink-600" />
+                  <span>Category</span>
+                  <span className="text-red-500 ml-1">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={product.category}
+                    onChange={(e) => setProduct({ ...product, category: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none appearance-none bg-white"
+                    required
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <FaTag className="text-gray-400" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <FaRupeeSign className="mr-2 text-pink-600" />
+                  <span>Price</span>
+                  <span className="text-red-500 ml-1">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">₹</span>
+                  <input
+                    type="number"
+                    value={product.price || ''}
+                    onChange={(e) => setProduct({ ...product, price: parseFloat(e.target.value) || 0 })}
+                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none"
+                    placeholder="0.00"
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <FaBox className="mr-2 text-pink-600" />
+                  <span>Stock Quantity</span>
+                  <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="number"
+                  value={product.stock || ''}
+                  onChange={(e) => setProduct({ ...product, stock: parseInt(e.target.value) || 0 })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none"
+                  placeholder="0"
+                  required
+                  min="0"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-2">
+              <label className="flex items-center text-sm font-semibold text-gray-700">
+                <span className="mr-2">Description</span>
+                <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={product.description}
+                onChange={(e) => setProduct({ ...product, description: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none resize-none"
+                rows={5}
+                placeholder="Describe your product in detail..."
+                required
+              />
             </div>
           </div>
+
+          {/* Specifications Card */}
+          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <div className="flex items-center mb-6">
+              <div className="bg-purple-100 p-2 rounded-lg mr-3">
+                <FaPalette className="h-5 w-5 text-purple-600" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800">Specifications</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <span className="mr-2">Material</span>
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={product.specifications.material}
+                  onChange={(e) => setProduct({
+                    ...product,
+                    specifications: { ...product.specifications, material: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none"
+                  placeholder="e.g., Silk, Cotton, Georgette"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <FaPalette className="mr-2 text-pink-600" />
+                  <span>Color</span>
+                  <span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={product.specifications.color}
+                  onChange={(e) => setProduct({
+                    ...product,
+                    specifications: { ...product.specifications, color: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none"
+                  placeholder="e.g., Red, Blue, Multicolor"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+        {/* Images Card */}
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+          <div className="flex items-center mb-6">
+            <div className="bg-blue-100 p-2 rounded-lg mr-3">
+              <FaImage className="h-5 w-5 text-blue-600" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800">Product Images</h2>
+          </div>
+
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+              isDragging
+                ? 'border-pink-500 bg-pink-50'
+                : 'border-gray-300 hover:border-pink-400 hover:bg-gray-50'
+            }`}
+          >
+            <input
+              ref={fileInputRef}
+              id="file-upload"
+              name="images"
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleFileInputChange}
+              className="hidden"
+            />
+            <div className="space-y-4">
+              <div className="flex justify-center">
+                <div className={`p-4 rounded-full ${isDragging ? 'bg-pink-100' : 'bg-gray-100'}`}>
+                  <FaUpload className={`h-10 w-10 ${isDragging ? 'text-pink-600' : 'text-gray-400'}`} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-lg font-medium text-gray-700">
+                  {isDragging ? 'Drop images here' : 'Upload product images'}
+                </p>
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-pink-600 hover:text-pink-700 font-semibold underline"
+                  >
+                    Click to upload
+                  </button>
+                  <span>or drag and drop</span>
+                </div>
+                <p className="text-xs text-gray-500">PNG, JPG, JPEG up to 5MB each</p>
+              </div>
+            </div>
+          </div>
+
+          {previewImages.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold text-gray-700 mb-4">
+                Uploaded Images ({previewImages.length})
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {previewImages.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-pink-500 transition-colors">
+                      <img
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 shadow-lg transition-all opacity-0 group-hover:opacity-100"
+                      title="Remove image"
+                    >
+                      <FaTrash className="h-3 w-3" />
+                    </button>
+                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs py-1 px-2 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                      Image {index + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {previewImages.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {previewImages.map((preview, index) => (
-              <div key={index} className="relative">
-                <img
-                  src={preview}
-                  alt={`Preview ${index + 1}`}
-                  className="w-full h-32 object-cover rounded"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(index)}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                >
-                  <FaTrash className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
         {error && (
-          <div className="text-red-500 text-sm">
-            {error}
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+            <div className="flex items-center">
+              <FaInfoCircle className="h-5 w-5 text-red-500 mr-2" />
+              <p className="text-red-700 font-medium">{error}</p>
+            </div>
           </div>
         )}
 
-        <div className="flex justify-end space-x-4">
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-4 pt-4">
           <button
             type="button"
             onClick={() => navigate('/admin/products')}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            className="px-6 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 shadow-sm"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 disabled:opacity-50"
+            className="px-8 py-3 bg-gradient-to-r from-pink-600 to-pink-700 text-white rounded-lg font-semibold hover:from-pink-700 hover:to-pink-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center gap-2"
           >
-            {loading ? 'Saving...' : 'Save Product'}
+            {loading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <span>{productId ? 'Update Product' : 'Save Product'}</span>
+              </>
+            )}
           </button>
         </div>
       </form>
+      </div>
     </div>
   );
 };

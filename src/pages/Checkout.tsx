@@ -4,10 +4,9 @@ import axios from '../utils/axios';
 import { useCart } from '../context/CartContext';
 import { sendOrderConfirmationEmail } from '../utils/emailService';
 import toast from 'react-hot-toast';
-import { FaMapMarkerAlt } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaUser, FaHome, FaCity, FaPhone, FaEdit, FaPlus, FaCheck, FaTimes, FaMobileAlt } from 'react-icons/fa';
 // @ts-ignore
 import QRCode from 'react-qr-code';
-import { FaMobileAlt } from 'react-icons/fa';
 
 interface CartItem {
   _id: string;
@@ -410,400 +409,599 @@ const Checkout: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Checkout</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Shipping Address */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Shipping Address</h2>
-          <div className="mb-4">
-            <span className="font-medium">Saved Addresses</span>
-            <button
-              className="ml-4 text-pink-600 hover:underline"
-              onClick={() => setShowNewAddressForm(true)}
-            >
-              Add new address
-            </button>
-          </div>
-          {/* Address selection */}
-          {userAddresses.length > 0 ? (
-            <div className="space-y-2 mb-4">
-              {userAddresses.map((address) => (
-                <label
-                  key={address._id}
-                  className={`block border rounded-lg p-4 cursor-pointer transition-all ${selectedAddressId === address._id ? 'border-pink-500 bg-pink-50' : 'border-gray-200'}`}
-                >
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-yellow-50 pt-24 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-4xl font-serif font-bold text-gray-900 mb-8 text-center">Checkout</h1>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Shipping Address - Left Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Shipping Address Card */}
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <FaMapMarkerAlt className="text-pink-600" />
+                  Shipping Address
+                </h2>
+                {!showNewAddressForm && !editingAddressId && (
+                  <button
+                    onClick={() => setShowNewAddressForm(true)}
+                    className="px-4 py-2 bg-pink-600 text-white rounded-lg font-semibold hover:bg-pink-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center gap-2"
+                  >
+                    <FaPlus className="h-4 w-4" />
+                    Add New Address
+                  </button>
+                )}
+              </div>
+              {/* Address selection */}
+              {!showNewAddressForm && !editingAddressId && (
+                <>
+                  {userAddresses.length > 0 ? (
+                    <div className="space-y-3">
+                      {userAddresses.map((address) => (
+                        <label
+                          key={address._id}
+                          className={`block border-2 rounded-xl p-5 cursor-pointer transition-all duration-200 ${
+                            selectedAddressId === address._id
+                              ? 'border-pink-500 bg-pink-50 shadow-md'
+                              : 'border-gray-200 hover:border-pink-300 hover:bg-pink-50/50'
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <input
+                              type="radio"
+                              name="selectedAddress"
+                              value={address._id}
+                              checked={selectedAddressId === address._id}
+                              onChange={() => handleAddressSelect(address._id)}
+                              className="mt-1 accent-pink-600"
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <FaUser className="text-gray-400" />
+                                  <span className="font-bold text-gray-900">{address.fullName}</span>
+                                  {address.isDefault && (
+                                    <span className="px-2 py-1 text-xs bg-pink-600 text-white rounded-full font-semibold">
+                                      Default
+                                    </span>
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditClick(address);
+                                  }}
+                                  className="text-pink-600 hover:text-pink-700 transition-colors p-2 hover:bg-pink-100 rounded-lg"
+                                >
+                                  <FaEdit className="h-4 w-4" />
+                                </button>
+                              </div>
+                              <div className="space-y-1 text-sm text-gray-600">
+                                <div className="flex items-center gap-2">
+                                  <FaHome className="text-gray-400" />
+                                  <span>{address.addressLine1}</span>
+                                </div>
+                                {address.addressLine2 && (
+                                  <div className="ml-6">{address.addressLine2}</div>
+                                )}
+                                <div className="flex items-center gap-2">
+                                  <FaCity className="text-gray-400" />
+                                  <span>{address.city}, {address.state} - {address.pincode}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <FaPhone className="text-gray-400" />
+                                  <span>{address.phone}</span>
+                                </div>
+                              </div>
+                            </div>
+                            {selectedAddressId === address._id && (
+                              <div className="flex-shrink-0">
+                                <div className="w-6 h-6 bg-pink-600 rounded-full flex items-center justify-center">
+                                  <FaCheck className="text-white text-xs" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
+                      <FaMapMarkerAlt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 mb-4">No saved addresses. Please add one.</p>
+                      <button
+                        onClick={() => setShowNewAddressForm(true)}
+                        className="px-6 py-2 bg-pink-600 text-white rounded-lg font-semibold hover:bg-pink-700 transition-colors"
+                      >
+                        Add Address
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+              {/* New address form */}
+              {showNewAddressForm && (
+                <form className="space-y-4" onSubmit={handleAddNewAddress}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Add New Address</h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewAddressForm(false);
+                        setNewAddress({
+                          fullName: '',
+                          addressLine1: '',
+                          addressLine2: '',
+                          city: '',
+                          state: '',
+                          pincode: '',
+                          phone: '',
+                          isDefault: false
+                        });
+                      }}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <FaTimes className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <FaUser className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={newAddress.fullName}
+                        onChange={handleNewAddressChange}
+                        className="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                        placeholder="Enter your full name"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Address Line 1</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <FaHome className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        name="addressLine1"
+                        value={newAddress.addressLine1}
+                        onChange={handleNewAddressChange}
+                        className="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                        placeholder="Street address, P.O. box"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Address Line 2 (Optional)</label>
+                    <input
+                      type="text"
+                      name="addressLine2"
+                      value={newAddress.addressLine2}
+                      onChange={handleNewAddressChange}
+                      className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                      placeholder="Apartment, suite, unit, building, floor, etc."
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <FaCity className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          name="city"
+                          value={newAddress.city}
+                          onChange={handleNewAddressChange}
+                          className="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                          placeholder="City"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
+                      <input
+                        type="text"
+                        name="state"
+                        value={newAddress.state}
+                        onChange={handleNewAddressChange}
+                        className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                        placeholder="State"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Pincode</label>
+                      <input
+                        type="text"
+                        name="pincode"
+                        value={newAddress.pincode}
+                        onChange={handleNewAddressChange}
+                        className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                        placeholder="PIN code"
+                        maxLength={6}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <FaPhone className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={newAddress.phone}
+                          onChange={handleNewAddressChange}
+                          className="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                          placeholder="10-digit number"
+                          maxLength={10}
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="isDefault"
+                      checked={newAddress.isDefault}
+                      onChange={handleNewAddressChange}
+                      className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
+                    />
+                    <label className="ml-2 text-sm text-gray-700 cursor-pointer">Set as default address</label>
+                  </div>
+                  <div className="flex gap-4 pt-2">
+                    <button
+                      type="submit"
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
+                      Save Address
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewAddressForm(false);
+                        setNewAddress({
+                          fullName: '',
+                          addressLine1: '',
+                          addressLine2: '',
+                          city: '',
+                          state: '',
+                          pincode: '',
+                          phone: '',
+                          isDefault: false
+                        });
+                      }}
+                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+              {/* Edit address form */}
+              {editingAddressId && editAddress && (
+                <form className="space-y-4" onSubmit={handleEditAddress}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Edit Address</h3>
+                    <button
+                      type="button"
+                      onClick={() => { setEditingAddressId(null); setEditAddress(null); }}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <FaTimes className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <FaUser className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        name="fullName"
+                        value={editAddress.fullName}
+                        onChange={handleEditAddressChange}
+                        className="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Address Line 1</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <FaHome className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        name="addressLine1"
+                        value={editAddress.addressLine1}
+                        onChange={handleEditAddressChange}
+                        className="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <FaCity className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          name="city"
+                          value={editAddress.city}
+                          onChange={handleEditAddressChange}
+                          className="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
+                      <input
+                        type="text"
+                        name="state"
+                        value={editAddress.state}
+                        onChange={handleEditAddressChange}
+                        className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Pincode</label>
+                      <input
+                        type="text"
+                        name="pincode"
+                        value={editAddress.pincode}
+                        onChange={handleEditAddressChange}
+                        className="block w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <FaPhone className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={editAddress.phone}
+                          onChange={handleEditAddressChange}
+                          className="block w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      name="isDefault"
+                      checked={editAddress.isDefault}
+                      onChange={handleEditAddressChange}
+                      className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
+                    />
+                    <label className="ml-2 text-sm text-gray-700 cursor-pointer">Set as default address</label>
+                  </div>
+                  <div className="flex gap-4 pt-2">
+                    <button
+                      type="submit"
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setEditingAddressId(null); setEditAddress(null); }}
+                      className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+
+            {/* Payment Method Card */}
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Method</h2>
+              <div className="space-y-3">
+                <label className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                  paymentMethod === 'online' ? 'border-pink-500 bg-pink-50' : 'border-gray-200 hover:border-pink-300'
+                }`}>
                   <input
                     type="radio"
-                    name="selectedAddress"
-                    value={address._id}
-                    checked={selectedAddressId === address._id}
-                    onChange={() => handleAddressSelect(address._id)}
-                    className="mr-2 accent-pink-600"
+                    name="paymentMethod"
+                    value="online"
+                    checked={paymentMethod === 'online'}
+                    onChange={() => setPaymentMethod('online')}
+                    className="mr-3 accent-pink-600"
                   />
-                  <span className="font-bold">{address.fullName}</span> <br />
-                  {address.addressLine1}, {address.city}, {address.state} - {address.pincode}<br />
-                  Phone: {address.phone}
-                  {address.isDefault && (
-                    <span className="ml-2 px-2 py-1 text-xs bg-pink-100 text-pink-600 rounded">Default</span>
-                  )}
-                  <button
-                    type="button"
-                    className="ml-2 text-blue-600 hover:underline text-xs"
-                    onClick={() => handleEditClick(address)}
-                  >
-                    Edit
-                  </button>
+                  <div>
+                    <div className="font-semibold text-gray-900">UPI Payment</div>
+                    <div className="text-sm text-gray-600">Pay via UPI apps (PhonePe, Google Pay, Paytm, etc.)</div>
+                  </div>
                 </label>
-              ))}
+              </div>
+
+              {/* UPI Payment Section */}
+              {paymentMethod === 'online' && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">Pay with UPI</h3>
+                  
+                  {isMobileDevice() ? (
+                    <div className="text-center py-6">
+                      <button
+                        onClick={handleOpenUpiApp}
+                        className="flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 mx-auto"
+                      >
+                        <FaMobileAlt className="text-2xl" />
+                        <span>Open UPI App</span>
+                      </button>
+                      <p className="mt-4 text-gray-600 text-sm">
+                        This will open your default UPI app with pre-filled payment details
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center py-6">
+                      <div className="bg-white p-4 rounded-xl shadow-lg">
+                        <QRCode
+                          value={generateUpiDeepLink()}
+                          style={{ height: 200, width: 200 }}
+                        />
+                      </div>
+                      <p className="mt-4 text-gray-700 font-semibold">UPI ID: <span className="font-mono text-pink-600">9959430763@axl</span></p>
+                      <p className="mt-2 text-gray-500 text-sm">Scan this QR code with any UPI app to pay ₹{calculateTotal().toLocaleString()}</p>
+                    </div>
+                  )}
+                  
+                  {!showPaymentForm && (
+                    <button
+                      className="mt-6 w-full px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors"
+                      onClick={() => setShowPaymentForm(true)}
+                    >
+                      I've Completed Payment
+                    </button>
+                  )}
+                  
+                  {showPaymentForm && (
+                    <form className="mt-6 space-y-4" onSubmit={handlePaymentFormSubmit}>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Transaction ID</label>
+                        <input
+                          type="text"
+                          name="transactionId"
+                          value={paymentForm.transactionId}
+                          onChange={handlePaymentFormChange}
+                          required
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                          placeholder="Enter transaction ID"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Payment Date</label>
+                        <input
+                          type="date"
+                          name="paymentDate"
+                          value={paymentForm.paymentDate}
+                          onChange={handlePaymentFormChange}
+                          required
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Amount Paid</label>
+                        <input
+                          type="number"
+                          name="amount"
+                          value={paymentForm.amount}
+                          onChange={handlePaymentFormChange}
+                          required
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                          placeholder="Enter amount"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={submittingPayment}
+                        className="w-full px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      >
+                        {submittingPayment ? 'Submitting...' : 'Submit Payment Details'}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="mb-4 text-gray-500">No saved addresses. Please add one.</div>
-          )}
-          {/* New address form */}
-          {showNewAddressForm && (
-            <form className="space-y-4" onSubmit={handleAddNewAddress}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={newAddress.fullName}
-                  onChange={handleNewAddressChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                  required
-                />
+          </div>
+
+          {/* Order Summary - Right Column */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 sticky top-24">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Order Summary</h2>
+              
+              {/* Cart Items */}
+              <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
+                {cartItems.map((item) => (
+                  <div key={item._id} className="flex gap-4 pb-4 border-b border-gray-200 last:border-0">
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">{item.name}</div>
+                      <div className="text-sm text-gray-600">Quantity: {item.quantity}</div>
+                      <div className="text-pink-600 font-semibold mt-1">₹{(item.price * item.quantity).toLocaleString()}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Address Line 1</label>
-                <input
-                  type="text"
-                  name="addressLine1"
-                  value={newAddress.addressLine1}
-                  onChange={handleNewAddressChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Address Line 2 (Optional)</label>
-                <input
-                  type="text"
-                  name="addressLine2"
-                  value={newAddress.addressLine2}
-                  onChange={handleNewAddressChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">City</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={newAddress.city}
-                    onChange={handleNewAddressChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                    required
-                  />
+
+              {/* Price Breakdown */}
+              <div className="space-y-3 mb-6 pt-4 border-t border-gray-200">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal</span>
+                  <span>₹{calculateTotal().toLocaleString()}</span>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">State</label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={newAddress.state}
-                    onChange={handleNewAddressChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                    required
-                  />
+                <div className="flex justify-between text-gray-600">
+                  <span>Shipping</span>
+                  <span className="text-green-600">Free</span>
+                </div>
+                <div className="flex justify-between text-2xl font-bold text-gray-900 pt-3 border-t border-gray-200">
+                  <span>Total</span>
+                  <span className="text-pink-600">₹{calculateTotal().toLocaleString()}</span>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Pincode</label>
-                  <input
-                    type="text"
-                    name="pincode"
-                    value={newAddress.pincode}
-                    onChange={handleNewAddressChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                    required
-                  />
+
+              {/* Error Message */}
+              {error && (
+                <div className="mb-4 bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl">
+                  {error}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone</label>
-                  <input
-                    type="text"
-                    name="phone"
-                    value={newAddress.phone}
-                    onChange={handleNewAddressChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="isDefault"
-                  checked={newAddress.isDefault}
-                  onChange={handleNewAddressChange}
-                  className="mr-2"
-                />
-                <label className="text-sm">Set as default address</label>
-              </div>
-              <div className="flex space-x-4">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700"
-                >
-                  Save Address
-                </button>
-                <button
-                  type="button"
-                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
-                  onClick={() => {
-                    setShowNewAddressForm(false);
-                    setNewAddress({
-                      fullName: '',
-                      addressLine1: '',
-                      addressLine2: '',
-                      city: '',
-                      state: '',
-                      pincode: '',
-                      phone: '',
-                      isDefault: false
-                    });
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          )}
-          {editingAddressId && editAddress && (
-            <form className="space-y-4" onSubmit={handleEditAddress}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={editAddress.fullName}
-                  onChange={handleEditAddressChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Address</label>
-                <input
-                  type="text"
-                  name="address"
-                  value={editAddress.addressLine1}
-                  onChange={handleEditAddressChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">City</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={editAddress.city}
-                    onChange={handleEditAddressChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">State</label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={editAddress.state}
-                    onChange={handleEditAddressChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Pincode</label>
-                  <input
-                    type="text"
-                    name="pincode"
-                    value={editAddress.pincode}
-                    onChange={handleEditAddressChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone</label>
-                  <input
-                    type="text"
-                    name="phone"
-                    value={editAddress.phone}
-                    onChange={handleEditAddressChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                    required
-                  />
-                </div>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="isDefault"
-                  checked={editAddress.isDefault}
-                  onChange={handleEditAddressChange}
-                  className="mr-2"
-                />
-                <label className="text-sm">Set as default address</label>
-              </div>
-              <div className="flex space-x-4">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700"
-                >
-                  Save Changes
-                </button>
-                <button
-                  type="button"
-                  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
-                  onClick={() => { setEditingAddressId(null); setEditAddress(null); }}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-        {/* Order Summary (existing code) */}
-        {/* ... */}
-      </div>
-      {/* Place Order button and error message */}
-      {error && <div className="text-red-500 mt-4">{error}</div>}
-      <button
-        className="mt-8 w-full md:w-auto px-8 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
-        onClick={handleSubmit}
-        disabled={loading}
-      >
-        {loading ? 'Placing Order...' : 'Place Order'}
-      </button>
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
-        <div className="flex flex-col space-y-2">
-          {/* <label className="flex items-center">
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="cod"
-              checked={paymentMethod === 'cod'}
-              onChange={() => setPaymentMethod('cod')}
-              className="mr-2 accent-pink-600"
-            />
-            Cash on Delivery
-          </label> */}
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="online"
-              checked={paymentMethod === 'online'}
-              onChange={() => setPaymentMethod('online')}
-              className="mr-2 accent-pink-600"
-            />
-            UPI Payment
-          </label>
+              )}
+
+              {/* Place Order Button */}
+              <button
+                onClick={handleSubmit}
+                disabled={loading || !selectedAddressId}
+                className="w-full px-6 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl font-semibold text-lg hover:from-pink-700 hover:to-rose-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Placing Order...</span>
+                  </>
+                ) : (
+                  'Place Order'
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      {paymentMethod === 'online' && (
-        <div className="mb-6 flex flex-col items-center">
-          <h3 className="text-lg font-semibold mb-2">Pay with UPI</h3>
-          
-          {isMobileDevice() ? (
-            <div className="text-center">
-              <button
-                onClick={handleOpenUpiApp}
-                className="flex items-center justify-center space-x-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <FaMobileAlt className="text-xl" />
-                <span>Open UPI App</span>
-              </button>
-              <p className="mt-2 text-gray-600 text-sm">
-                This will open your default UPI app with pre-filled payment details
-              </p>
-            </div>
-          ) : (
-            <>
-              <QRCode
-                value={generateUpiDeepLink()}
-                style={{ height: 200, width: 200 }}
-              />
-              <p className="mt-2 text-gray-600 text-sm">UPI ID: <span className="font-mono">9959430763@axl</span></p>
-              <p className="text-gray-500 text-xs">Scan this QR code with any UPI app to pay ₹{calculateTotal()}.</p>
-            </>
-          )}
-          
-          {!showPaymentForm && (
-            <button
-              className="mt-4 px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-              onClick={() => setShowPaymentForm(true)}
-            >
-              Done
-            </button>
-          )}
-          
-          {showPaymentForm && (
-            <form className="mt-4 w-full max-w-sm space-y-4" onSubmit={handlePaymentFormSubmit}>
-              <div>
-                <label className="block mb-1">Transaction ID</label>
-                <input
-                  type="text"
-                  name="transactionId"
-                  value={paymentForm.transactionId}
-                  onChange={handlePaymentFormChange}
-                  required
-                  className="w-full border rounded px-2 py-1"
-                />
-              </div>
-              <div>
-                <label className="block mb-1">Payment Date</label>
-                <input
-                  type="date"
-                  name="paymentDate"
-                  value={paymentForm.paymentDate}
-                  onChange={handlePaymentFormChange}
-                  required
-                  className="w-full border rounded px-2 py-1"
-                />
-              </div>
-              <div>
-                <label className="block mb-1">Amount Paid</label>
-                <input
-                  type="number"
-                  name="amount"
-                  value={paymentForm.amount}
-                  onChange={handlePaymentFormChange}
-                  required
-                  className="w-full border rounded px-2 py-1"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={submittingPayment}
-                className="bg-pink-600 text-white px-4 py-2 rounded"
-              >
-                {submittingPayment ? 'Submitting...' : 'Submit Payment Details'}
-              </button>
-            </form>
-          )}
-        </div>
-      )}
     </div>
   );
 };

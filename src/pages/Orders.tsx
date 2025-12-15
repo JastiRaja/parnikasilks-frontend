@@ -10,6 +10,8 @@ interface Order {
   totalAmount: number;
   status: string;
   createdAt: string;
+  expectedDeliveryDate?: string;
+  courierService?: string;
   items: {
     product: {
       name: string;
@@ -184,6 +186,20 @@ const Orders: React.FC = () => {
                 <p className="text-sm text-gray-500">
                   {new Date(order.createdAt).toLocaleDateString()}
                 </p>
+                {order.expectedDeliveryDate && (
+                  <p className="text-sm text-pink-600 font-medium mt-1">
+                    Expected Delivery: {new Date(order.expectedDeliveryDate).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </p>
+                )}
+                {order.courierService && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Courier: {order.courierService}
+                  </p>
+                )}
               </div>
               <div className="flex items-center space-x-2">
                 {getStatusIcon(order.status)}

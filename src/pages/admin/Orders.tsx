@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../../utils/axios';
 import toast from 'react-hot-toast';
 import { FaClock, FaCheckCircle, FaTimesCircle, FaTruck } from 'react-icons/fa';
@@ -20,6 +20,8 @@ interface Order {
   totalAmount: number;
   status: string;
   createdAt: string;
+  expectedDeliveryDate?: string;
+  courierService?: string;
   shippingAddress: {
     fullName: string;
     addressLine1: string;
@@ -40,8 +42,13 @@ interface Order {
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [showShippingModal, setShowShippingModal] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [shippingData, setShippingData] = useState({
+    expectedDeliveryDate: '',
+    courierService: ''
+  });
 
   useEffect(() => {
     fetchOrders();
@@ -61,6 +68,15 @@ const Orders = () => {
   };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    // If changing to "shipped", show modal to enter delivery details
+    if (newStatus === 'shipped') {
+      setSelectedOrderId(orderId);
+      setShippingData({ expectedDeliveryDate: '', courierService: '' });
+      setShowShippingModal(true);
+      return;
+    }
+
+    // For other status changes, update directly
     try {
       setUpdatingStatus(orderId);
       await api.put(`/api/orders/${orderId}/status`, { status: newStatus });
@@ -74,6 +90,46 @@ const Orders = () => {
       );
       
       toast.success('Order status updated successfully');
+    } catch (error) {
+      toast.error('Failed to update order status');
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  const handleShippingSubmit = async () => {
+    if (!selectedOrderId) return;
+
+    if (!shippingData.expectedDeliveryDate) {
+      toast.error('Please enter expected delivery date');
+      return;
+    }
+
+    try {
+      setUpdatingStatus(selectedOrderId);
+      await api.put(`/api/orders/${selectedOrderId}/status`, {
+        status: 'shipped',
+        expectedDeliveryDate: shippingData.expectedDeliveryDate,
+        courierService: shippingData.courierService || undefined
+      });
+      
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order._id === selectedOrderId 
+            ? { 
+                ...order, 
+                status: 'shipped',
+                expectedDeliveryDate: shippingData.expectedDeliveryDate,
+                courierService: shippingData.courierService
+              }
+            : order
+        )
+      );
+      
+      toast.success('Order marked as shipped with delivery date');
+      setShowShippingModal(false);
+      setSelectedOrderId(null);
+      setShippingData({ expectedDeliveryDate: '', courierService: '' });
     } catch (error) {
       toast.error('Failed to update order status');
     } finally {
@@ -134,7 +190,7 @@ const Orders = () => {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 pt-24">
       <h1 className="text-2xl font-bold mb-6">Manage Orders</h1>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -159,6 +215,9 @@ const Orders = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Expected Delivery
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Txn ID
@@ -238,6 +297,24 @@ const Orders = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
+                    {order.expectedDeliveryDate ? (
+                      <div>
+                        <div className="text-sm font-medium text-pink-600">
+                          {new Date(order.expectedDeliveryDate).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </div>
+                        {order.courierService && (
+                          <div className="text-xs text-gray-500">{order.courierService}</div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">Not set</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
                     {order.paymentDetails?.transactionId || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -275,6 +352,65 @@ const Orders = () => {
           </table>
         </div>
       </div>
+
+      {/* Shipping Modal */}
+      {showShippingModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Mark Order as Shipped</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Expected Delivery Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={shippingData.expectedDeliveryDate}
+                  onChange={(e) => setShippingData({ ...shippingData, expectedDeliveryDate: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">Enter the delivery date provided by courier service</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Courier Service (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={shippingData.courierService}
+                  onChange={(e) => setShippingData({ ...shippingData, courierService: e.target.value })}
+                  placeholder="e.g., Blue Dart, DTDC, FedEx"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-pink-500 focus:ring-pink-200 transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-6">
+              <button
+                onClick={handleShippingSubmit}
+                disabled={updatingStatus === selectedOrderId}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {updatingStatus === selectedOrderId ? 'Updating...' : 'Mark as Shipped'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowShippingModal(false);
+                  setSelectedOrderId(null);
+                  setShippingData({ expectedDeliveryDate: '', courierService: '' });
+                }}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

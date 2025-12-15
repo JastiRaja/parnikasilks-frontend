@@ -30,6 +30,8 @@ interface Order {
   totalAmount: number;
   status: string;
   items: OrderItem[];
+  expectedDeliveryDate?: string;
+  courierService?: string;
   shippingAddress: {
     fullName: string;
     address: string;
@@ -137,7 +139,7 @@ const OrderConfirmation: React.FC = () => {
               <span className="text-gray-600">Tracking Number:</span>
               <span className="font-medium">{order.trackingNumber}</span>
             </div>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-2">
               <span className="text-gray-600">Order Date:</span>
               <span className="font-medium">
                 {new Date(order.createdAt).toLocaleDateString('en-IN', {
@@ -147,6 +149,24 @@ const OrderConfirmation: React.FC = () => {
                 })}
               </span>
             </div>
+            {order.expectedDeliveryDate && (
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Expected Delivery:</span>
+                <span className="font-medium text-pink-600">
+                  {new Date(order.expectedDeliveryDate).toLocaleDateString('en-IN', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </span>
+              </div>
+            )}
+            {order.courierService && (
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-gray-600">Courier Service:</span>
+                <span className="font-medium">{order.courierService}</span>
+              </div>
+            )}
           </div>
 
           <div className="mb-6">
@@ -156,7 +176,17 @@ const OrderConfirmation: React.FC = () => {
                 <FaBox className="text-pink-500 text-xl" />
                 <div className="ml-2">
                   <p className="font-medium text-gray-800">{order.status.toUpperCase()}</p>
-                  <p className="text-sm text-gray-500">We'll notify you when your order ships</p>
+                  {order.expectedDeliveryDate ? (
+                    <p className="text-sm text-gray-500">
+                      Expected delivery: {new Date(order.expectedDeliveryDate).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-500">We'll notify you when your order ships</p>
+                  )}
                 </div>
               </div>
             </div>

@@ -81,14 +81,14 @@ const AdminProducts: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Products</h1>
+    <div className="container mx-auto px-4 pt-24 pb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Manage Products</h1>
         <Link
           to="/admin/products/new"
-          className="bg-pink-600 text-white px-4 py-2 rounded-md hover:bg-pink-700 transition-colors flex items-center space-x-2"
+          className="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center space-x-2 font-semibold whitespace-nowrap z-10 relative"
         >
-          <FaPlus />
+          <FaPlus className="h-5 w-5" />
           <span>Add New Product</span>
         </Link>
       </div>
@@ -106,17 +106,24 @@ const AdminProducts: React.FC = () => {
         />
       </div>
 
-      {error ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <p className="text-red-500 text-lg mb-4">{error}</p>
-          <button
-            onClick={fetchProducts}
-            className="bg-pink-600 text-white px-6 py-2 rounded-md hover:bg-pink-700 transition-colors"
-          >
-            Try Again
-          </button>
+      {error && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-red-800 font-semibold mb-1">Error Loading Products</p>
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+            <button
+              onClick={fetchProducts}
+              className="bg-pink-600 text-white px-4 py-2 rounded-md hover:bg-pink-700 transition-colors whitespace-nowrap"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
-      ) : (
+      )}
+
+      {!error && (
         <div className="overflow-x-auto bg-white rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">

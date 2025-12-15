@@ -6,7 +6,8 @@ import {
   ShoppingBag, 
   Users, 
   Settings, 
-  LogOut 
+  LogOut,
+  Image
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -26,8 +27,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   };
 
   const menuItems = [
-    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/products', icon: Package, label: 'Products' },
+    { path: '/admin/slides', icon: Image, label: 'Slides' },
     { path: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
     { path: '/admin/customers', icon: Users, label: 'Customers' },
     { path: '/admin/users', icon: Users, label: 'User Management' },

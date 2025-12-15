@@ -20,6 +20,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
 import AdminOrders from './pages/admin/Orders';
 import AdminCustomers from './pages/admin/Customers';
+import AdminSlides from './pages/admin/Slides';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProductForm from './pages/admin/ProductForm';
 import ScrollToTop from './components/ScrollToTop';
@@ -65,6 +66,7 @@ const router = createBrowserRouter([
       { path: 'admin/products/:productId/edit', element: <ProtectedRoute requireAdmin><ProductForm /></ProtectedRoute> },
       { path: 'admin/orders', element: <ProtectedRoute requireAdmin><AdminOrders /></ProtectedRoute> },
       { path: 'admin/customers', element: <ProtectedRoute requireAdmin><AdminCustomers /></ProtectedRoute> },
+      { path: 'admin/slides', element: <ProtectedRoute requireAdmin><AdminSlides /></ProtectedRoute> },
     ]
   }
 ], {
