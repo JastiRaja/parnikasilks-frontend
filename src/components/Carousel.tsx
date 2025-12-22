@@ -27,27 +27,27 @@ const Carousel: React.FC = () => {
     try {
       setError(null);
       const response = await axios.get('/api/slides');
-      console.log('Slides API response:', response.data);
       if (response.data.success) {
         if (response.data.slides && response.data.slides.length > 0) {
           setSlides(response.data.slides);
-          console.log(`Loaded ${response.data.slides.length} slide(s)`);
         } else {
-          console.log('No active slides found');
-          setError('No slides available');
+          // No slides available - this is fine, component will return null
+          setSlides([]);
         }
       } else {
-        setError(response.data.message || 'Failed to load slides');
+        // If API returns unsuccessful response, just set empty slides
+        setSlides([]);
       }
     } catch (error: any) {
-      console.error('Error fetching slides:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch slides';
-      setError(errorMessage);
-      console.error('Slides fetch error details:', {
-        message: errorMessage,
-        status: error.response?.status,
-        data: error.response?.data
-      });
+      // Silently handle errors - don't expose backend URLs or error details
+      // 404 or any other error means no slides are available, which is fine
+      if (error.response?.status === 404) {
+        // Endpoint doesn't exist or no slides - this is expected
+        setSlides([]);
+      } else {
+        // For other errors, silently fail and show no slides
+        setSlides([]);
+      }
     } finally {
       setLoading(false);
     }

@@ -218,18 +218,18 @@ const ProductDetail: React.FC = () => {
 
   return (
     <div className="pt-20 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
           {/* Left Side - Fixed Image with Thumbnails */}
-          <div className="w-2/5 flex-shrink-0">
-            <div className="flex gap-4">
-              {/* Thumbnail Images (Vertical) */}
+          <div className="w-full lg:w-2/5 flex-shrink-0">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              {/* Thumbnail Images (Horizontal on mobile, Vertical on desktop) */}
               {product.images && product.images.length > 1 && (
-                <div className="flex flex-col gap-2 w-20">
+                <div className="flex flex-row sm:flex-col gap-2 sm:w-20 order-2 sm:order-1">
                   {product.images.map((image, index) => (
                     <div
                       key={index}
-                      className={`cursor-pointer border-2 rounded overflow-hidden ${
+                      className={`cursor-pointer border-2 rounded overflow-hidden flex-shrink-0 ${
                         selectedImage === index ? 'border-blue-500' : 'border-gray-300'
                       }`}
                       onClick={() => setSelectedImage(index)}
@@ -237,7 +237,7 @@ const ProductDetail: React.FC = () => {
                       <img
                         src={getImageUrl(image)}
                         alt={`${product.name} - View ${index + 1}`}
-                        className="w-full h-20 object-cover"
+                        className="w-16 h-16 sm:w-full sm:h-20 object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src = '/images/Placeholder.png';
@@ -249,12 +249,12 @@ const ProductDetail: React.FC = () => {
               )}
 
                 {/* Main Image */}
-                <div className="flex-1 bg-white border border-gray-200 rounded p-4">
+                <div className="flex-1 bg-white border border-gray-200 rounded p-2 sm:p-4 order-1 sm:order-2">
                   {product.images && product.images[selectedImage] ? (
                     <img
                       src={getImageUrl(product.images[selectedImage])}
                       alt={product.name}
-                      className="w-full h-96 object-contain"
+                      className="w-full h-64 sm:h-80 lg:h-96 object-contain"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = '/images/Placeholder.png';
@@ -264,18 +264,18 @@ const ProductDetail: React.FC = () => {
                     <img
                       src="/images/Placeholder.png"
                       alt={`${product.name} (no image)`}
-                      className="w-full h-96 object-contain"
+                      className="w-full h-64 sm:h-80 lg:h-96 object-contain"
                     />
                   )}
                 </div>
             </div>
 
             {/* Action Buttons Below Image */}
-            <div className="mt-6 space-y-3">
+            <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
               <button
                 onClick={handleBuyNow}
                 disabled={!product.stock}
-                className="w-full py-3 bg-orange-500 text-white rounded font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-2.5 sm:py-3 bg-orange-500 text-white rounded font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 <FaBolt className="h-4 w-4" />
                 BUY NOW
@@ -283,7 +283,7 @@ const ProductDetail: React.FC = () => {
               <button
                 onClick={handleCartAction}
                 disabled={!product.stock}
-                className={`w-full py-3 rounded font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+                className={`w-full py-2.5 sm:py-3 rounded font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base ${
                   isInCart
                     ? 'bg-gray-600 text-white hover:bg-gray-700'
                     : 'bg-orange-400 text-white hover:bg-orange-500'
@@ -296,16 +296,16 @@ const ProductDetail: React.FC = () => {
           </div>
 
           {/* Right Side - Scrollable Content */}
-          <div className="flex-1 overflow-y-auto max-h-[calc(100vh-8rem)] pr-4">
-            <div className="space-y-6">
+          <div className="flex-1 lg:overflow-y-auto lg:max-h-[calc(100vh-8rem)] lg:pr-4">
+            <div className="space-y-4 sm:space-y-6">
               {/* Product Title */}
               <div>
-                <h1 className="text-2xl font-semibold text-gray-900 mb-2">{product.name}</h1>
-                <div className="flex items-center gap-4">
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">{product.name}</h1>
+                <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                   {product.averageRating && product.averageRating > 0 && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2">
                       {renderStars(product.averageRating)}
-                      <span className="text-sm text-gray-600">
+                      <span className="text-xs sm:text-sm text-gray-600">
                         {product.averageRating.toFixed(1)} ({product.totalReviews || 0} ratings)
                       </span>
                     </div>
@@ -314,17 +314,17 @@ const ProductDetail: React.FC = () => {
               </div>
 
               {/* Price */}
-              <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-semibold text-gray-900">
+              <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
+                <span className="text-2xl sm:text-3xl font-semibold text-gray-900">
                   ₹{product.price.toLocaleString()}
                 </span>
                 {product.originalPrice && product.originalPrice > product.price && (
                   <>
-                    <span className="text-lg text-gray-500 line-through">
+                    <span className="text-base sm:text-lg text-gray-500 line-through">
                       ₹{product.originalPrice.toLocaleString()}
                     </span>
                     {discount > 0 && (
-                      <span className="text-sm text-green-600 font-semibold">{discount}% off</span>
+                      <span className="text-xs sm:text-sm text-green-600 font-semibold">{discount}% off</span>
                     )}
                   </>
                 )}
@@ -346,78 +346,78 @@ const ProductDetail: React.FC = () => {
               </div>
 
               {/* Product Details Section */}
-              <div className="bg-white border border-gray-200 rounded p-4">
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Product Details</h2>
-                <dl className="space-y-2 text-sm">
+              <div className="bg-white border border-gray-200 rounded p-3 sm:p-4">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Product Details</h2>
+                <dl className="space-y-2 text-xs sm:text-sm">
                   {product.specifications?.material && (
-                    <div className="flex">
-                      <dt className="font-medium text-gray-700 w-32">Material:</dt>
-                      <dd className="text-gray-600">{product.specifications.material}</dd>
+                    <div className="flex flex-col sm:flex-row">
+                      <dt className="font-medium text-gray-700 sm:w-32 mb-0.5 sm:mb-0">Material:</dt>
+                      <dd className="text-gray-600 sm:ml-0">{product.specifications.material}</dd>
                     </div>
                   )}
                   {product.specifications?.color && (
-                    <div className="flex">
-                      <dt className="font-medium text-gray-700 w-32">Color:</dt>
-                      <dd className="text-gray-600">{product.specifications.color}</dd>
+                    <div className="flex flex-col sm:flex-row">
+                      <dt className="font-medium text-gray-700 sm:w-32 mb-0.5 sm:mb-0">Color:</dt>
+                      <dd className="text-gray-600 sm:ml-0">{product.specifications.color}</dd>
                     </div>
                   )}
                   {product.specifications?.sareeType && product.specifications.sareeType !== 'Not specified' && (
-                    <div className="flex">
-                      <dt className="font-medium text-gray-700 w-32">Saree Type:</dt>
-                      <dd className="text-gray-600">{product.specifications.sareeType}</dd>
+                    <div className="flex flex-col sm:flex-row">
+                      <dt className="font-medium text-gray-700 sm:w-32 mb-0.5 sm:mb-0">Saree Type:</dt>
+                      <dd className="text-gray-600 sm:ml-0">{product.specifications.sareeType}</dd>
                     </div>
                   )}
                   {product.specifications?.occasion && product.specifications.occasion !== 'Not specified' && (
-                    <div className="flex">
-                      <dt className="font-medium text-gray-700 w-32">Occasion:</dt>
-                      <dd className="text-gray-600">{product.specifications.occasion}</dd>
+                    <div className="flex flex-col sm:flex-row">
+                      <dt className="font-medium text-gray-700 sm:w-32 mb-0.5 sm:mb-0">Occasion:</dt>
+                      <dd className="text-gray-600 sm:ml-0">{product.specifications.occasion}</dd>
                     </div>
                   )}
                   {product.specifications?.pattern && product.specifications.pattern !== 'Not specified' && (
-                    <div className="flex">
-                      <dt className="font-medium text-gray-700 w-32">Pattern:</dt>
-                      <dd className="text-gray-600">{product.specifications.pattern}</dd>
+                    <div className="flex flex-col sm:flex-row">
+                      <dt className="font-medium text-gray-700 sm:w-32 mb-0.5 sm:mb-0">Pattern:</dt>
+                      <dd className="text-gray-600 sm:ml-0">{product.specifications.pattern}</dd>
                     </div>
                   )}
-                  <div className="flex">
-                    <dt className="font-medium text-gray-700 w-32">Category:</dt>
-                    <dd className="text-gray-600 capitalize">{product.category}</dd>
+                  <div className="flex flex-col sm:flex-row">
+                    <dt className="font-medium text-gray-700 sm:w-32 mb-0.5 sm:mb-0">Category:</dt>
+                    <dd className="text-gray-600 capitalize sm:ml-0">{product.category}</dd>
                   </div>
                 </dl>
               </div>
 
               {/* Description */}
-              <div className="bg-white border border-gray-200 rounded p-4">
-                <h2 className="text-lg font-semibold text-gray-900 mb-3">Description</h2>
-                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+              <div className="bg-white border border-gray-200 rounded p-3 sm:p-4">
+                <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-3">Description</h2>
+                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed whitespace-pre-line">
                   {product.description || 'No description available.'}
                 </p>
               </div>
 
               {/* Ratings & Reviews */}
               {product.reviews && product.reviews.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-gray-900">Ratings & Reviews</h2>
+                <div className="bg-white border border-gray-200 rounded p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 gap-2">
+                    <h2 className="text-base sm:text-lg font-semibold text-gray-900">Ratings & Reviews</h2>
                     {product.averageRating && product.averageRating > 0 && (
-                      <div className="flex items-center gap-2">
-                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded font-semibold">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="px-2 sm:px-3 py-1 bg-green-100 text-green-700 rounded font-semibold text-xs sm:text-sm">
                           {product.averageRating.toFixed(1)}
                         </span>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-xs sm:text-sm text-gray-600">
                           {product.totalReviews || product.reviews.length} ratings and {product.reviews.length} reviews
                         </span>
                       </div>
                     )}
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {product.reviews.slice(0, 5).map((review) => (
-                      <div key={review._id} className="border-b border-gray-200 pb-4 last:border-0">
-                        <div className="flex items-center gap-2 mb-2">
+                      <div key={review._id} className="border-b border-gray-200 pb-3 sm:pb-4 last:border-0">
+                        <div className="flex items-center gap-2 mb-1 sm:mb-2 flex-wrap">
                           {renderStars(review.rating)}
-                          <span className="text-sm font-medium text-gray-900">{review.user?.name || 'Anonymous'}</span>
+                          <span className="text-xs sm:text-sm font-medium text-gray-900">{review.user?.name || 'Anonymous'}</span>
                         </div>
-                        <p className="text-sm text-gray-700">{review.comment}</p>
+                        <p className="text-xs sm:text-sm text-gray-700">{review.comment}</p>
                         <p className="text-xs text-gray-500 mt-1">
                           {new Date(review.createdAt).toLocaleDateString()}
                         </p>
@@ -429,9 +429,9 @@ const ProductDetail: React.FC = () => {
 
               {/* Similar Products */}
               {similarProducts.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded p-4">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Similar Products</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div className="bg-white border border-gray-200 rounded p-3 sm:p-4">
+                  <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Similar Products</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
                     {similarProducts.map((similarProduct) => {
                       const similarDiscount = similarProduct.originalPrice && similarProduct.originalPrice > similarProduct.price
                         ? Math.round(((similarProduct.originalPrice - similarProduct.price) / similarProduct.originalPrice) * 100)

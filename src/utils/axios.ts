@@ -52,13 +52,21 @@ const handleResponseError = (error: any) => {
     window.location.href = '/login';
   }
   
-  // Better error logging
+  // Suppress logging for 404 errors to avoid exposing backend URLs
+  // 404s are expected for optional resources like slides
+  if (error.response?.status === 404) {
+    // Silently handle 404 errors - don't log backend URLs
+    return Promise.reject(error);
+  }
+  
+  // Better error logging for other errors (without exposing full URLs)
   if (error.code === 'ECONNABORTED') {
-    console.error('Request timeout:', error.config?.url);
+    console.error('Request timeout');
   } else if (error.response) {
-    console.error('API Error:', error.response.status, error.response.data);
+    // Only log status code, not the full URL or backend details
+    console.error('API Error:', error.response.status);
   } else if (error.request) {
-    console.error('Network Error:', error.request);
+    console.error('Network Error');
   } else {
     console.error('Error:', error.message);
   }

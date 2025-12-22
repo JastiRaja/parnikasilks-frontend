@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from '../utils/axios';
-import { FaSearch, FaStar, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaSearch, FaStar, FaChevronDown, FaChevronUp, FaFilter, FaTimes } from 'react-icons/fa';
 import { BACKEND_URL } from '../utils/constants';
 import toast from 'react-hot-toast';
 
@@ -89,6 +89,7 @@ const Products: React.FC = () => {
     occasion: [],
     pattern: []
   });
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -507,6 +508,227 @@ const Products: React.FC = () => {
 
           {/* Main Products Grid */}
           <div className="flex-1">
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden mb-4 flex items-center justify-between">
+              <button
+                onClick={() => setShowMobileFilters(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                <FaFilter className="h-4 w-4" />
+                Filters
+                {(Object.values(selectedFilters).some(arr => arr.length > 0) || selectedCategory !== 'all') && (
+                  <span className="ml-1 px-1.5 py-0.5 bg-blue-600 text-white text-xs rounded-full">
+                    {Object.values(selectedFilters).reduce((sum, arr) => sum + arr.length, 0) + (selectedCategory !== 'all' ? 1 : 0)}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Mobile Filter Drawer */}
+            {showMobileFilters && (
+              <div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50" onClick={() => setShowMobileFilters(false)}>
+                <div className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                  <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between z-10">
+                    <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+                    <button
+                      onClick={() => setShowMobileFilters(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <FaTimes className="h-5 w-5 text-gray-600" />
+                    </button>
+                  </div>
+                  <div className="p-4">
+                    {/* Categories */}
+                    <div className="mb-4 pb-4 border-b border-gray-200">
+                      <div className="text-sm font-medium text-gray-700 mb-2">CATEGORIES</div>
+                      <div className="space-y-1">
+                        <button
+                          onClick={() => setSelectedCategory('all')}
+                          className={`block w-full text-left text-sm py-1 px-2 rounded hover:bg-gray-100 ${
+                            selectedCategory === 'all' ? 'text-blue-600 font-medium' : 'text-gray-600'
+                          }`}
+                        >
+                          All Products
+                        </button>
+                        {categories.filter(c => c !== 'all').map((category) => (
+                          <button
+                            key={category}
+                            onClick={() => setSelectedCategory(category)}
+                            className={`block w-full text-left text-sm py-1 px-2 rounded hover:bg-gray-100 capitalize ${
+                              selectedCategory === category ? 'text-blue-600 font-medium' : 'text-gray-600'
+                            }`}
+                          >
+                            {category}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Saree Type Filter */}
+                    {getUniqueValues(products, 'sareeType').length > 0 && (
+                      <div className="mb-4 pb-4 border-b border-gray-200">
+                        <button
+                          onClick={() => toggleFilter('sareeType')}
+                          className="flex items-center justify-between w-full text-sm font-medium text-gray-700 mb-2"
+                        >
+                          <span>SAREE TYPE</span>
+                          {expandedFilters.sareeType ? <FaChevronUp className="text-xs" /> : <FaChevronDown className="text-xs" />}
+                        </button>
+                        {expandedFilters.sareeType && (
+                          <div className="space-y-1 max-h-48 overflow-y-auto">
+                            {getUniqueValues(products, 'sareeType').map((type) => (
+                              <label key={type} className="flex items-center text-sm text-gray-600 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedFilters.sareeType.includes(type)}
+                                  onChange={() => handleFilterChange('sareeType', type)}
+                                  className="mr-2"
+                                />
+                                {type}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Fabric/Material Filter */}
+                    {getUniqueValues(products, 'material').length > 0 && (
+                      <div className="mb-4 pb-4 border-b border-gray-200">
+                        <button
+                          onClick={() => toggleFilter('fabric')}
+                          className="flex items-center justify-between w-full text-sm font-medium text-gray-700 mb-2"
+                        >
+                          <span>FABRIC</span>
+                          {expandedFilters.fabric ? <FaChevronUp className="text-xs" /> : <FaChevronDown className="text-xs" />}
+                        </button>
+                        {expandedFilters.fabric && (
+                          <div className="space-y-1 max-h-48 overflow-y-auto">
+                            {getUniqueValues(products, 'material').map((fabric) => (
+                              <label key={fabric} className="flex items-center text-sm text-gray-600 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedFilters.fabric.includes(fabric)}
+                                  onChange={() => handleFilterChange('fabric', fabric)}
+                                  className="mr-2"
+                                />
+                                {fabric}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Color Filter */}
+                    {getUniqueValues(products, 'color').length > 0 && (
+                      <div className="mb-4 pb-4 border-b border-gray-200">
+                        <button
+                          onClick={() => toggleFilter('color')}
+                          className="flex items-center justify-between w-full text-sm font-medium text-gray-700 mb-2"
+                        >
+                          <span>COLOR</span>
+                          {expandedFilters.color ? <FaChevronUp className="text-xs" /> : <FaChevronDown className="text-xs" />}
+                        </button>
+                        {expandedFilters.color && (
+                          <div className="space-y-1 max-h-48 overflow-y-auto">
+                            {getUniqueValues(products, 'color').map((color) => (
+                              <label key={color} className="flex items-center text-sm text-gray-600 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedFilters.color.includes(color)}
+                                  onChange={() => handleFilterChange('color', color)}
+                                  className="mr-2"
+                                />
+                                {color}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Occasion Filter */}
+                    {getUniqueValues(products, 'occasion').length > 0 && (
+                      <div className="mb-4 pb-4 border-b border-gray-200">
+                        <button
+                          onClick={() => toggleFilter('occasion')}
+                          className="flex items-center justify-between w-full text-sm font-medium text-gray-700 mb-2"
+                        >
+                          <span>OCCASION</span>
+                          {expandedFilters.occasion ? <FaChevronUp className="text-xs" /> : <FaChevronDown className="text-xs" />}
+                        </button>
+                        {expandedFilters.occasion && (
+                          <div className="space-y-1 max-h-48 overflow-y-auto">
+                            {getUniqueValues(products, 'occasion').map((occasion) => (
+                              <label key={occasion} className="flex items-center text-sm text-gray-600 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedFilters.occasion.includes(occasion)}
+                                  onChange={() => handleFilterChange('occasion', occasion)}
+                                  className="mr-2"
+                                />
+                                {occasion}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Pattern Filter */}
+                    {getUniqueValues(products, 'pattern').length > 0 && (
+                      <div className="mb-4 pb-4 border-b border-gray-200">
+                        <button
+                          onClick={() => toggleFilter('pattern')}
+                          className="flex items-center justify-between w-full text-sm font-medium text-gray-700 mb-2"
+                        >
+                          <span>PATTERN</span>
+                          {expandedFilters.pattern ? <FaChevronUp className="text-xs" /> : <FaChevronDown className="text-xs" />}
+                        </button>
+                        {expandedFilters.pattern && (
+                          <div className="space-y-1 max-h-48 overflow-y-auto">
+                            {getUniqueValues(products, 'pattern').map((pattern) => (
+                              <label key={pattern} className="flex items-center text-sm text-gray-600 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedFilters.pattern.includes(pattern)}
+                                  onChange={() => handleFilterChange('pattern', pattern)}
+                                  className="mr-2"
+                                />
+                                {pattern}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Clear Filters Button */}
+                    {(Object.values(selectedFilters).some(arr => arr.length > 0) || selectedCategory !== 'all') && (
+                      <button
+                        onClick={() => {
+                          clearFilters();
+                          setSelectedCategory('all');
+                        }}
+                        className="w-full mt-4 px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors"
+                      >
+                        Clear All Filters
+                      </button>
+                    )}
+
+                    {/* Apply Button */}
+                    <button
+                      onClick={() => setShowMobileFilters(false)}
+                      className="w-full mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition-colors"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {filteredProducts.length === 0 ? (
               <div className="text-center py-20">
                 <div className="max-w-md mx-auto">
