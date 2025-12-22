@@ -19,6 +19,9 @@ interface Product {
   specifications: {
     material: string;
     color: string;
+    sareeType?: string;
+    occasion?: string;
+    pattern?: string;
   };
   // careInstructions: string;
 }
@@ -45,8 +48,9 @@ const ProductForm: React.FC = () => {
     specifications: {
       material: '',
       color: '',
-      // size: '',
-      // weight: '',
+      sareeType: '',
+      occasion: '',
+      pattern: '',
     },
     // careInstructions: '',
   });
@@ -472,6 +476,74 @@ const ProductForm: React.FC = () => {
                   placeholder="e.g., Red, Blue, Multicolor"
                   required
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <span className="mr-2">Saree Type</span>
+                </label>
+                <select
+                  value={product.specifications.sareeType || ''}
+                  onChange={(e) => setProduct({
+                    ...product,
+                    specifications: { ...product.specifications, sareeType: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none appearance-none bg-white"
+                >
+                  <option value="">Select saree type (optional)</option>
+                  <option value="Kanjivaram">Kanjivaram</option>
+                  <option value="Banarasi">Banarasi</option>
+                  <option value="Silk">Silk</option>
+                  <option value="Cotton">Cotton</option>
+                  <option value="Georgette">Georgette</option>
+                  <option value="Chiffon">Chiffon</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <span className="mr-2">Occasion</span>
+                </label>
+                <select
+                  value={product.specifications.occasion || ''}
+                  onChange={(e) => setProduct({
+                    ...product,
+                    specifications: { ...product.specifications, occasion: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none appearance-none bg-white"
+                >
+                  <option value="">Select occasion (optional)</option>
+                  <option value="Wedding">Wedding</option>
+                  <option value="Party">Party</option>
+                  <option value="Casual">Casual</option>
+                  <option value="Festival">Festival</option>
+                  <option value="Formal">Formal</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="flex items-center text-sm font-semibold text-gray-700">
+                  <span className="mr-2">Pattern</span>
+                </label>
+                <select
+                  value={product.specifications.pattern || ''}
+                  onChange={(e) => setProduct({
+                    ...product,
+                    specifications: { ...product.specifications, pattern: e.target.value }
+                  })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all outline-none appearance-none bg-white"
+                >
+                  <option value="">Select pattern (optional)</option>
+                  <option value="Solid">Solid</option>
+                  <option value="Printed">Printed</option>
+                  <option value="Embroidered">Embroidered</option>
+                  <option value="Self Design">Self Design</option>
+                  <option value="Floral">Floral</option>
+                  <option value="Geometric">Geometric</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
             </div>
           </div>

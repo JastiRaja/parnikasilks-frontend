@@ -14,7 +14,11 @@ const Footer: React.FC = () => {
               <img 
                 src="/Parnikasilks logo.JPG" 
                 alt="Parnika Silks" 
-                className="h-12 w-auto object-contain brightness-0 invert"
+                className="h-12 w-auto object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
               />
             </div>
             <h3 className="text-xl font-bold mb-4 text-white">About Parnika Silks</h3>

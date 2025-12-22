@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../utils/axios';
 import toast from 'react-hot-toast';
-import { FaClock, FaCheckCircle, FaTimesCircle, FaTruck } from 'react-icons/fa';
+import { FaClock, FaCheckCircle, FaTimesCircle, FaTruck, FaPrint } from 'react-icons/fa';
 
 interface Order {
   _id: string;
@@ -40,6 +41,7 @@ interface Order {
 }
 
 const Orders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
@@ -231,8 +233,8 @@ const Orders = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Verified
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -333,18 +335,28 @@ const Orders = () => {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {!order.paymentDetails?.verified && order.paymentDetails?.transactionId && (
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={async () => {
-                          await api.post(`/api/admin/orders/${order._id}/verify-payment`);
-                          toast.success('Payment marked as verified!');
-                          fetchOrders();
-                        }}
-                        className="bg-green-600 text-white px-2 py-1 rounded"
+                        onClick={() => navigate(`/admin/orders/${order._id}/shipping-label`)}
+                        className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-1"
+                        title="Print Shipping Label"
                       >
-                        Mark as Verified
+                        <FaPrint className="h-3 w-3" />
+                        Label
                       </button>
-                    )}
+                      {!order.paymentDetails?.verified && order.paymentDetails?.transactionId && (
+                        <button
+                          onClick={async () => {
+                            await api.post(`/api/admin/orders/${order._id}/verify-payment`);
+                            toast.success('Payment marked as verified!');
+                            fetchOrders();
+                          }}
+                          className="bg-green-600 text-white px-2 py-1 rounded text-sm"
+                        >
+                          Verify
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

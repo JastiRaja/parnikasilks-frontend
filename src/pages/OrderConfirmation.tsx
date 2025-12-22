@@ -124,7 +124,7 @@ const OrderConfirmation: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-3xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md mt-8 p-6 mb-6">
           <div className="flex items-center justify-center mb-6">
             <FaCheckCircle className="text-green-500 text-4xl mr-3" />
             <h1 className="text-2xl font-semibold text-gray-800">Order Confirmed!</h1>
@@ -245,7 +245,7 @@ const OrderConfirmation: React.FC = () => {
                       <>
                         <div className="flex justify-between text-sm text-gray-600">
                           <span>Subtotal</span>
-                          <span>₹{order.subtotal.toLocaleString()}</span>
+                          <span> ₹{order.subtotal.toLocaleString()}</span>
                         </div>
                         <div className="flex justify-between text-sm text-gray-600">
                           <span>Delivery Charges</span>
@@ -258,8 +258,8 @@ const OrderConfirmation: React.FC = () => {
                       </>
                     )}
                     <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
-                      <span>Total</span>
-                      <span className="font-medium">₹{order.totalAmount.toLocaleString()}</span>
+                      <span>Total: ₹ </span>
+                      <span className="font-medium">{order.totalAmount.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>

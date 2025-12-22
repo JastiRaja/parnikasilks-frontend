@@ -21,6 +21,7 @@ import AdminProducts from './pages/admin/Products';
 import AdminOrders from './pages/admin/Orders';
 import AdminCustomers from './pages/admin/Customers';
 import AdminSlides from './pages/admin/Slides';
+import ShippingLabel from './pages/admin/ShippingLabel';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProductForm from './pages/admin/ProductForm';
 import ScrollToTop from './components/ScrollToTop';
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
     path: '/',
     element: (
       <CartProvider>
+        <ScrollToTop />
         <div className="flex flex-col min-h-screen">
           <Navbar />
           <main className="flex-grow">
@@ -65,6 +67,7 @@ const router = createBrowserRouter([
       { path: 'admin/products/new', element: <ProtectedRoute requireAdmin><ProductForm /></ProtectedRoute> },
       { path: 'admin/products/:productId/edit', element: <ProtectedRoute requireAdmin><ProductForm /></ProtectedRoute> },
       { path: 'admin/orders', element: <ProtectedRoute requireAdmin><AdminOrders /></ProtectedRoute> },
+      { path: 'admin/orders/:orderId/shipping-label', element: <ProtectedRoute requireAdmin><ShippingLabel /></ProtectedRoute> },
       { path: 'admin/customers', element: <ProtectedRoute requireAdmin><AdminCustomers /></ProtectedRoute> },
       { path: 'admin/slides', element: <ProtectedRoute requireAdmin><AdminSlides /></ProtectedRoute> },
     ]
