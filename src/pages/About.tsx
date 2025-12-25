@@ -95,7 +95,7 @@ const About: React.FC = () => {
           <div className="text-gray-600">
             <p className="mb-4">As an online boutique, we're here to serve you 24/7 through our digital platform.</p>
             <p className="mb-2">Email: parnikasilksofficial@gmail.com</p>
-            <p className="mb-4">Phone: +91 9030389516</p>
+            <p className="mb-4">Phone: +91 9********6</p>
             <p className="text-sm italic">Experience the magic of handcrafted silk sarees from the comfort of your home.</p>
           </div>
         </div>

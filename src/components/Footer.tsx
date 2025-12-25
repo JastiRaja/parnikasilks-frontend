@@ -69,10 +69,10 @@ const Footer: React.FC = () => {
               <li className="flex items-start group">
                 <GiRotaryPhone className="mr-3 mt-1 text-pink-400 flex-shrink-0 group-hover:scale-110 transition-transform" />
                 <a 
-                  href="tel:+919030389516" 
+                  href="tel:+919********6" 
                   className="text-gray-300 hover:text-pink-400 transition-colors duration-200"
                 >
-                  +91 9030389516
+                  +91 9********6
                 </a>
               </li>
               <li className="flex items-start group">
